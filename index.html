@@ -208,7 +208,6 @@
       outline-offset: 2px;
     }
 
-    /* Plain pill button (non-radio) */
     button.pill {
       appearance: none;
       font-family: inherit;
@@ -302,6 +301,7 @@
       justify-content: space-between;
       align-items: baseline;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
     .result-item { font-size: 18px; font-weight: 700; letter-spacing: .02em; }
@@ -815,18 +815,15 @@
   els.apiKey.addEventListener('input', () => {
     const newLen = els.apiKey.value.length;
     if (newLen > displayLen) {
-      // Typed or pasted — new chars are after the old display
       const newChars = els.apiKey.value.slice(displayLen);
       realKey += newChars;
     } else if (newLen < displayLen) {
-      // Deleted — remove from end
       const removed = displayLen - newLen;
       realKey = realKey.slice(0, realKey.length - removed);
     }
     renderMaskedKey();
   });
 
-  // Explicit paste handler for deterministic append behavior
   els.apiKey.addEventListener('paste', (e) => {
     e.preventDefault();
     const pasted = (e.clipboardData || window.clipboardData).getData('text').trim();
@@ -836,13 +833,11 @@
     }
   });
 
-  // Prevent cursor movement to middle of masked field (only end editable)
   els.apiKey.addEventListener('click', () => {
     els.apiKey.setSelectionRange(realKey.length, realKey.length);
   });
   els.apiKey.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft' || e.key === 'Home') {
-      // Allow but snap back to end after
       setTimeout(() => els.apiKey.setSelectionRange(realKey.length, realKey.length), 0);
     }
   });
@@ -853,7 +848,6 @@
     els.apiKey.focus();
   });
 
-  // Load any saved key on page load
   try {
     const saved = localStorage.getItem(KEY_STORAGE);
     if (saved) {
@@ -893,30 +887,53 @@
         return;
       }
 
-      const listings = data.itemmarket || [];
+      // Torn v2 shape: data.itemmarket.listings is the array
+      const market    = data.itemmarket || {};
+      const itemMeta  = market.item || {};
+      const listings  = market.listings || [];
+      const total     = data._metadata?.total ?? listings.length;
+
       if (!listings.length) {
         els.screenerOut.innerHTML = '<div class="result-sub">No listings found for this item.</div>';
         return;
       }
 
-      let html = `<table class="screener-table">
+      const avgPrice = itemMeta.average_price || 0;
+      let html = `
+        <div class="result-head" style="padding-bottom:12px;">
+          <div class="result-top">
+            <span class="result-item">${esc(itemMeta.name || 'Item')} <span class="result-sub">(ID ${esc(String(itemMeta.id || itemId))})</span></span>
+            <span class="result-tag">${intFmt.format(total)} LISTINGS</span>
+          </div>
+          <div class="result-sub">Average price: <strong style="color:var(--text);">${money(avgPrice)}</strong> · Cheapest first</div>
+        </div>
+      `;
+
+      html += `<table class="screener-table">
         <thead><tr>
           <th>#</th><th>Price / unit</th><th>Qty</th><th>Total</th>
         </tr></thead><tbody>`;
 
       listings.forEach((l, i) => {
-        const unit  = l.cost || 0;
-        const qty   = l.quantity || 0;
-        const total = unit * qty;
+        const unit  = l.price  || 0;
+        const qty   = l.amount || 0;
+        const lineTotal = unit * qty;
         html += `<tr>
           <td>${i + 1}</td>
           <td class="price">${money(unit)}</td>
           <td>${intFmt.format(qty)}</td>
-          <td>${money(total)}</td>
+          <td>${money(lineTotal)}</td>
         </tr>`;
       });
 
       html += '</tbody></table>';
+
+      if (total > listings.length) {
+        html += `<div class="result-sub" style="margin-top:10px;">
+          Showing ${listings.length} of ${intFmt.format(total)} listings.
+        </div>`;
+      }
+
       els.screenerOut.innerHTML = html;
     } catch (err) {
       els.screenerOut.innerHTML = '<div class="unreachable">Network error — is the proxy function deployed?</div>';
