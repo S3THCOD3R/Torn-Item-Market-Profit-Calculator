@@ -1,33 +1,33 @@
 # netlify.toml
 # Configuration for the Torn Item Market Profit Calculator
-# Pins deploy settings, security headers, and the API proxy function.
 
 # ─────────────────────────────────────────────────────────────
 # BUILD SETTINGS
 # ─────────────────────────────────────────────────────────────
 [build]
-  # No build command — this is a pure static site.
   command = ""
-  # Serve files from the repository root (where index.html lives).
   publish = "."
 
 # ─────────────────────────────────────────────────────────────
 # SERVERLESS FUNCTIONS
 # ─────────────────────────────────────────────────────────────
 [functions]
-  # Directory where Netlify looks for serverless functions.
   directory = "netlify/functions"
-  # Bundle each function with esbuild for faster cold starts.
   node_bundler = "esbuild"
 
 # ─────────────────────────────────────────────────────────────
 # API PROXY REDIRECTS
-# ⚠️ ORDER MATTERS — this MUST come before the catch-all below.
-# Netlify evaluates redirects top-to-bottom and uses the first match.
+# ⚠️ ORDER MATTERS — API rules MUST come before the catch-all.
 # ─────────────────────────────────────────────────────────────
 [[redirects]]
   from = "/api/market"
   to = "/.netlify/functions/torn-proxy"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/items"
+  to = "/.netlify/functions/items-proxy"
   status = 200
   force = true
 
@@ -43,8 +43,7 @@
 
 # ─────────────────────────────────────────────────────────────
 # CATCH-ALL FALLBACK
-# ⚠️ THIS MUST COME LAST. If it came first, it would swallow
-# /api/market and the proxy function would never be reached.
+# ⚠️ THIS MUST COME LAST.
 # ─────────────────────────────────────────────────────────────
 [[redirects]]
   from = "/*"
