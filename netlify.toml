@@ -1,22 +1,16 @@
 # netlify.toml
 # Configuration for the Torn Item Market Profit Calculator
 
-# ─────────────────────────────────────────────────────────────
-# BUILD SETTINGS
-# ─────────────────────────────────────────────────────────────
 [build]
   command = ""
   publish = "."
 
-# ─────────────────────────────────────────────────────────────
-# SERVERLESS FUNCTIONS
-# ─────────────────────────────────────────────────────────────
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
 # ─────────────────────────────────────────────────────────────
-# API PROXY REDIRECTS
+# API PROXY REDIRECTS — both point to torn-proxy
 # ⚠️ ORDER MATTERS — API rules MUST come before the catch-all.
 # ─────────────────────────────────────────────────────────────
 [[redirects]]
@@ -27,7 +21,7 @@
 
 [[redirects]]
   from = "/api/items"
-  to = "/.netlify/functions/items-proxy"
+  to = "/.netlify/functions/torn-proxy"
   status = 200
   force = true
 
@@ -42,8 +36,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
 
 # ─────────────────────────────────────────────────────────────
-# CATCH-ALL FALLBACK
-# ⚠️ THIS MUST COME LAST.
+# CATCH-ALL FALLBACK — must come last
 # ─────────────────────────────────────────────────────────────
 [[redirects]]
   from = "/*"
