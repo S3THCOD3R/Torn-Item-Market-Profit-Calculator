@@ -1,29 +1,56 @@
 // netlify/functions/torn-proxy.js
 // Secure proxy for Torn API v2 item market calls.
-// Keeps your API key server-side and bypasses browser CORS restrictions.
+// The API key comes from the client (per-user), never stored server-side.
 
 const TORN_API_BASE = 'https://api.torn.com/v2';
 
+// Torn API keys are 16 alphanumeric characters.
+const KEY_PATTERN = /^[A-Za-z0-9]{16}$/;
+
 export async function handler(event) {
-  const { itemId } = event.queryStringParameters || {};
+  // Only accept POST
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: 'Method not allowed' }),
+    };
+  }
+
+  let body;
+  try {
+    body = JSON.parse(event.body || '{}');
+  } catch {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Invalid JSON body' }),
+    };
+  }
+
+  const { itemId, key } = body;
 
   if (!itemId) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: 'Missing itemId parameter' }),
+      body: JSON.stringify({ error: 'Missing itemId' }),
     };
   }
 
-  // Read key from Netlify environment variables (never hardcode).
-  const apiKey = process.env.TORN_API_KEY;
-  if (!apiKey) {
+  if (!key || typeof key !== 'string') {
     return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Server API key not configured' }),
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Missing API key' }),
     };
   }
 
-  const url = `${TORN_API_BASE}/market/${itemId}/itemmarket?key=${apiKey}&limit=20`;
+  // Validate key format before forwarding.
+  if (!KEY_PATTERN.test(key)) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Invalid API key format (expected 16 alphanumeric characters)' }),
+    };
+  }
+
+  const url = `${TORN_API_BASE}/market/${encodeURIComponent(itemId)}/itemmarket?key=${encodeURIComponent(key)}&limit=20`;
 
   try {
     const response = await fetch(url);
@@ -33,7 +60,7 @@ export async function handler(event) {
     if (data.error) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: data.error.error }),
+        body: JSON.stringify({ error: data.error.error || 'Torn API error' }),
       };
     }
 
@@ -41,7 +68,7 @@ export async function handler(event) {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=30', // Cache for 30s to reduce API calls
+        'Cache-Control': 'no-store',
       },
       body: JSON.stringify(data),
     };
