@@ -1,90 +1,91 @@
 <div align="center">
 
-# 📖 Torn Item Market Profit Calculator — Guidebook
+# 🩸 FIELD MANUAL 🩸
 
-**A field manual for the calculator.** Every control explained, every formula shown, every gotcha covered — so you can trust the numbers.
+### TORN ITEM MARKET · PROFIT CALCULATOR
 
-[**← Back to README**](README.md) · [**Contributing**](CONTRIBUTING.md) · [**License**](LICENSE)
+`[ OPERATION BRIEF • COMBAT MATH • THREAT REPORT ]`
+
+**Everything you need to run the calculator like a pro — every control, every formula, every trap.**
+
+[**← BACK TO BRIEFING**](README.md) · [**🛡️ ENLIST**](CONTRIBUTING.md) · [**📜 ARMISTICE**](LICENSE)
 
 </div>
 
 ---
 
-## Table of contents
+## 📖 TABLE OF INTEL
 
 1. [What this tool does](#1-what-this-tool-does)
-2. [The 5% sales tax (read this first)](#2-the-5-sales-tax-read-this-first)
-3. [The two modes](#3-the-two-modes)
+2. [The 5% tax — read this or lose money](#2-the-5-tax--read-this-or-lose-money)
+3. [The two strike modes](#3-the-two-strike-modes)
 4. [The two profit bases](#4-the-two-profit-bases)
-5. [Field-by-field reference](#5-field-by-field-reference)
-6. [Reading the results panel](#6-reading-the-results-panel)
-7. [Worked examples](#7-worked-examples)
-8. [The math](#8-the-math)
-9. [Common mistakes & gotchas](#9-common-mistakes--gotchas)
-10. [FAQ](#10-faq)
+5. [Control panel reference](#5-control-panel-reference)
+6. [Reading the results console](#6-reading-the-results-console)
+7. [Field reports — worked examples](#7-field-reports--worked-examples)
+8. [Combat math — the formulas](#8-combat-math--the-formulas)
+9. [Threat report — common kills](#9-threat-report--common-kills)
+10. [Comms — FAQ](#10-comms--faq)
 
 ---
 
 ## 1. What this tool does
 
-You buy items — from the item market, a bazaar, a player trade, wherever — then resell them on the **Torn item market**. The market charges a **5% sales tax** on every sale. This calculator tells you:
+You buy items — from the market, a bazaar, a player trade, wherever — then resell on the **Torn item market**. The market takes a **5% sales tax** on every sale. This calculator tells you:
 
-- **If you know your sell price** → how much profit you actually make, your ROI, your margin, and the lowest price you can sell at without losing money.
-- **If you know your target profit %** → the exact sell price per item you need to list at (tax included).
+- **If you already know your sell price** → what you actually walk away with: profit, ROI, margin, and your absolute floor before the deal goes underwater.
+- **If you know your target profit %** → the exact per-item listing price you need, tax already baked in.
 
 It works for single items and for bulk stacks (e.g. 10× Xanax).
 
 ---
 
-## 2. The 5% sales tax (read this first)
+## 2. The 5% tax — read this or lose money
 
-**The tax is applied to the sale price, not to your profit.**
+**The tax hits the sale price, not your profit.** Every sale loses 5% before it reaches your wallet.
 
-If you list an item at `$25,000`, the market takes `$1,250` (5%). You receive `$23,750`.
+> **FIELD NOTE:** List an item at `$25,000`. The market takes `$1,250`. You receive `$23,750`. That's the line.
 
-That means your break-even sell price is **not** your buy price — it's higher, because the tax eats into the sale. To break even on a `$20,000` item you must sell at:
+Which means break-even is **not** your buy price:
 
 ```
+break-even = buy price ÷ 0.95
 $20,000 ÷ 0.95 = $21,052.63
 ```
 
-The calculator handles this automatically. But if you're doing napkin math, remember: **every sale loses 5% before it reaches you.**
+The calculator handles it automatically. But if you're doing napkin math, remember: **5% vanishes on every kill.**
 
-> **On the "Round tax down per item" checkbox:** this is a *display-only* toggle. Torn may round the 5% tax down per individual item in some contexts. Turning it on shows tax as `floor(sell × 0.05) × qty` instead of `gross × 0.05`. It only changes the reported tax/profit — the sell-price solver always uses continuous 5%.
+> **💀 THREAT REPORT — the "Round tax down per item" checkbox:** this is *display-only*. Torn may floor the 5% tax per individual item in some contexts. Turning it on shows tax as `floor(sell × 0.05) × qty` instead of `gross × 0.05`. It only changes the *reported* tax/profit — the sell-price solver always uses continuous 5%.
 
 ---
 
-## 3. The two modes
+## 3. The two strike modes
 
-Toggle between them at the top under **Mode**.
+Toggle at the top under **Mode**.
 
-### 🔓 "Enter sell price" mode
-
-You know what you want to list at. The calculator tells you the profit.
+### 🔓 "Enter sell price" — you know the strike price
 
 - ✅ **Sell price / item** — editable, you type here
-- 🔒 **Profit %** — locked, auto-computed from your sell price
+- 🔒 **Profit %** — locked, solved from your sell price
 
-Use this when you're browsing the market and want to sanity-check whether a listing is worth flipping.
+Use this when you're scanning the market and want to know whether a listing is worth taking.
 
-### 🎯 "Set profit by %" mode
+### 🎯 "Set profit by %" — you know the take
 
-You know how much profit you want. The calculator tells you the sell price.
-
-- 🔒 **Sell price / item** — locked, auto-computed from your target %
+- 🔒 **Sell price / item** — locked, solved from your target %
 - ✅ **Profit %** — editable, you type here
 
-Use this when you're planning a flip ("I want 20% ROI on this Xanax stack — what do I list at?").
+Use this when you're planning a hit ("I want 20% ROI on this Xanax stack — what do I list at?").
 
-**A locked field has a dashed red border and a `LOCKED` badge next to its label.** Switch modes any time — the calculator carries the current value across so nothing jumps or resets.
+> **FIELD NOTE:** A locked field has a **dashed red border** and a `LOCKED` badge next to its label. Switch modes any time — values carry across, nothing resets.
 
 ---
 
 ## 4. The two profit bases
 
-Toggle under **Profit % basis**. This decides what "20%" *means*.
+Toggle under **Profit % basis**. This decides what "20%" *actually means*.
 
-### Markup on cost (ROI)
+### 📊 Markup on cost (ROI)
 
 > Profit as a percentage of **what you paid**.
 
@@ -92,48 +93,46 @@ Toggle under **Profit % basis**. This decides what "20%" *means*.
 - Profit = `$40,000`
 - ROI = **20%**
 
-This is the standard "return on investment" reading. It's what most traders mean when they say "I make 20%."
+This is the standard "return on investment" reading. **Most traders mean this.**
 
-### Margin on sale
+### 📊 Margin on sale
 
-> Profit as a percentage of the **gross sale amount**.
+> Profit as a percentage of the **gross sale**.
 
 - Gross sale = `$252,631.58`
 - Profit = `$40,000`
 - Margin = **15.83%**
 
-This is how retailers think ("my margin is X% of revenue"). It's always **lower than the equivalent ROI** for the same trade.
+This is how retailers think ("my margin is X% of revenue"). It's **always lower** than the equivalent ROI for the same trade.
 
-**⚠️ Margin is capped at 95%.** Because the tax already takes 5%, no sale can ever produce a 95%+ margin — the calculator shows a warning instead of a fake number.
+> **💀 THREAT REPORT:** Margin is **hard-capped at 95%**. Because the tax already takes 5%, no sale can ever produce a 95%+ margin — the calculator shows a warning instead of a fake number.
 
-**Rule of thumb:** if you're not sure which to use, pick **Markup on cost (ROI)**. It's what "profit %" almost always means in Torn trading.
+> **🩸 RULE OF THUMB:** If you're not sure which to use, pick **Markup on cost (ROI)**. It's what "profit %" almost always means in Torn trading.
 
 ---
 
-## 5. Field-by-field reference
+## 5. Control panel reference
 
-| Field | What it does | Notes |
+| CONTROL | FUNCTION | NOTES |
 |---|---|---|
-| **Item name** | Cosmetic label in the results panel | Doesn't affect math — just for readability |
-| **Buy price / item** | What you paid per unit | Enter `0` if the item was free (e.g. found) |
-| **Quantity** | How many units you're flipping | Must be ≥ 1; drives all bulk math |
-| **Sell price / item** | Your listing price per unit | Editable in *Enter sell price* mode; locked in *%* mode |
-| **Profit %** | Target profit (as ROI or margin) | Editable in *%* mode; locked in *sell* mode |
-| **Extra fees / costs** | Any other cost added to total | e.g. travel, bazaar fees, courier — anything you want to net out |
+| **Item name** | Cosmetic label on the results console | Doesn't affect math — readability only |
+| **Buy price / item** | What you paid per unit | Enter `0` for free pickups |
+| **Quantity** | Units being flipped | Must be ≥ 1; drives bulk math |
+| **Sell price / item** | Your listing price per unit | Live in *Enter sell price* mode; locked in *%* mode |
+| **Profit %** | Target profit (ROI or margin) | Live in *%* mode; locked in *sell* mode |
+| **Extra fees / costs** | Any other cost added to total | Travel, bazaar fees, courier — anything to net out |
 | **Round tax down per item** | Display-only tax rounding | See §2 |
 
-**Total cost** = `buy price × quantity + extra fees`. The calculator shows this on the results panel so you always know what it's using.
+**Total cost** = `buy × quantity + extra fees`. The results console shows this on every run — you always know what it's using.
 
 ---
 
-## 6. Reading the results panel
-
-The results card always shows the same rows, top to bottom:
+## 6. Reading the results console
 
 ```
 ┌─────────────────────────────────────────────┐
 │  ITEM NAME              [ TARGET or SELL ]  │  ← context tag
-│  +$40,000.00                                │  ← headline profit
+│  +$40,000.00                                │  ← headline take
 │  Sell at $25,263.16 each · Qty 10           │  ← one-line summary
 ├─────────────────────────────────────────────┤
 │  Gross sale             $252,631.58         │
@@ -149,31 +148,31 @@ The results card always shows the same rows, top to bottom:
 └─────────────────────────────────────────────┘
 ```
 
-**What each row means:**
+**Every row, decoded:**
 
 - **Gross sale** — `sell price × qty`, before tax
 - **Sales tax (5%)** — what Torn takes
 - **Net revenue** — what lands in your wallet
 - **Total cost** — `buy × qty + extra fees`
-- **Profit / item** — the headline profit split per unit (useful when comparing to per-item market prices)
-- **ROI on cost** — profit ÷ cost (always shown, even in margin mode)
-- **Margin on sale** — profit ÷ gross sale (always shown, even in markup mode)
-- **Break-even sell price** — the lowest per-item price that produces zero loss after tax
+- **Profit / item** — the headline take per unit
+- **ROI on cost** — profit ÷ cost *(always shown, even in margin mode)*
+- **Margin on sale** — profit ÷ gross sale *(always shown, even in markup mode)*
+- **Break-even sell price** — lowest per-item price that survives the tax
 
-The headline profit is **green** if you're up and **red** if you're down, with a `+`/`−` sign so there's no ambiguity.
+The headline take is **green** if you're up, **red** if you're down, with a `+`/`−` sign so there's no ambiguity.
 
 ---
 
-## 7. Worked examples
+## 7. Field reports — worked examples
 
-### Example A — "Is this flip worth it?" (sell price mode)
+### 🩸 FIELD REPORT A — "Is this flip worth it?" *(sell price mode)*
 
-You see Xanax on the market at `$20,000`. You want to resell at `$25,000` and you're buying 10.
+Xanax on market at `$20,000`. Resell at `$25,000`. Buying 10.
 
 1. Mode: **Enter sell price**
 2. Buy: `20000`, Qty: `10`, Sell: `25000`, Fees: `0`
 
-**Result:**
+**Intel:**
 - Gross: `$250,000`
 - Tax: `$12,500`
 - Net: `$237,500`
@@ -183,54 +182,54 @@ You see Xanax on the market at `$20,000`. You want to resell at `$25,000` and yo
 - Margin: **15.00%**
 - Break-even: `$21,052.63`
 
-✅ Positive and above break-even — good flip.
+✅ Positive and above break-even — good hit.
 
 ---
 
-### Example B — "I want 20% ROI, what do I list at?" (% mode)
+### 🩸 FIELD REPORT B — "I want 20% ROI. What do I list at?" *(% mode)*
 
-Same buy — `$20,000` × 10 — but this time you want a guaranteed **20% ROI**.
+Same buy — `$20,000` × 10 — but you want a hard **20% ROI**.
 
 1. Mode: **Set profit by %**
 2. Basis: **Markup on cost**
 3. Buy: `20000`, Qty: `10`, Profit %: `20`
 
-**Result:**
+**Intel:**
 - **Sell price (locked): `$25,263.16`**
 - Profit: `$40,000` — exactly 20% of your `$200,000` cost ✅
 
-Any lower and you miss your target. Any higher and you're leaving money on the table (or pricing above the market).
+Any lower → miss the target. Any higher → leave money on the table.
 
 ---
 
-### Example C — "Include travel costs"
+### 🩸 FIELD REPORT C — "Include travel costs"
 
-You're paying `$50,000` in travel + misc to complete the trade. Buy is `$20,000 × 10`.
+You're paying `$50,000` in travel + misc. Buy is `$20,000 × 10`.
 
 1. Buy: `20000`, Qty: `10`, Fees: `50000`
 2. Mode: **Set profit by %**, target: `20`
 
 Total cost = `$200,000 + $50,000 = $250,000`.
 
-**Result:**
+**Intel:**
 - Sell price (locked): `$31,578.95`
 - Profit: `$50,000` = 20% of `$250,000` ✅
 
-Notice the required sell price **jumped** — fees eat into profit, so you must list higher to hit the same ROI.
+> **FIELD NOTE:** Notice the required sell price **jumped**. Fees eat into profit — you must list higher to hit the same ROI.
 
 ---
 
-### Example D — "What's my floor?"
+### 🩸 FIELD REPORT D — "What's my floor?"
 
-You don't care about % — you just want to know the lowest price you can list without losing money.
+You don't care about %. You just want the lowest safe listing.
 
-Look at **Break-even sell price** in the results. For a `$20,000` buy, it's `$21,052.63`. Anything below that and you lose money after tax. Anything exactly at that and you profit `$0`.
+Check **Break-even sell price**. For a `$20,000` buy: `$21,052.63`. Anything below → loss. At exactly that → `$0` profit.
 
 ---
 
-## 8. The math
+## 8. Combat math — the formulas
 
-If you want to verify the calculator or build your own, here are the exact formulas.
+Want to verify the calculator or build your own? Here's the exact math.
 
 **Definitions:**
 - `C` = total cost = `buy × qty + fees`
@@ -269,63 +268,63 @@ S = C / (0.95 − p)
 sell = S / qty
 ```
 
-The `0.95 − p` denominator is why **margin is capped at 95%** — at `p = 0.95` the denominator hits zero, and above it the equation has no solution (you'd need infinite gross sale).
+> **💀 THREAT REPORT:** The `0.95 − p` denominator is why **margin caps at 95%** — at `p = 0.95` the denominator hits zero, and above it there's no solution (you'd need infinite gross sale).
 
 ---
 
-## 9. Common mistakes & gotchas
+## 9. Threat report — common kills
 
-**❌ "I forgot about the 5% tax."**
-The single biggest error. If you buy at `$20,000` and sell at `$21,000` thinking you made `$1,000`, you actually lost money — the market took `$1,050` and you netted `−$50`.
+**❌ "I forgot the 5% tax."**
+The #1 killer. Buy at `$20,000`, sell at `$21,000` thinking you made `$1,000`? You actually **lost money** — the market took `$1,050` and you netted `−$50`.
 
 **❌ "I used margin when I meant ROI."**
-If you set "20%" and your result feels low, check the basis toggle. 20% margin ≈ 23.5% ROI on the same trade.
+If your "20%" result feels weak, check the basis toggle. 20% margin ≈ 23.5% ROI on the same trade.
 
 **❌ "I forgot extra fees."**
-Travel, courier fees, refunds, whatever you spend getting the items — put it in **Extra fees**. If you leave it blank the calculator assumes `$0`.
+Travel, courier, refunds — drop them into **Extra fees**. Blank = `$0` assumed.
 
-**❌ "Quantity was 1 but I have a stack of 100."**
-The headline profit is for the **whole stack**, not one item. The **Profit / item** row tells you per-unit.
+**❌ "Quantity was 1, but I have a stack of 100."**
+The headline take is for the **whole stack**, not one item. The **Profit / item** row tells you per-unit.
 
 **❌ "I set margin to 96% and it says unreachable."**
-That's correct. 95% is the ceiling. Lower the target.
+Correct. 95% is the ceiling. Lower the target.
 
 **❌ "Locked field won't let me type."**
 That's intentional. Switch modes to unlock it. See §3.
 
 ---
 
-## 10. FAQ
+## 10. Comms — FAQ
 
-**Q: Does the calculator account for Torn's actual rounding rules?**
-A: The sell-price solver uses continuous 5% (no rounding), which matches Torn's official tax formula. The **Round tax down per item** checkbox is cosmetic — it only affects the displayed tax in the results panel.
+**Q: Does the calculator handle Torn's rounding rules?**
+A: The sell-price solver uses continuous 5% (no rounding), matching Torn's official tax formula. The **Round tax down per item** checkbox is cosmetic — it only affects the displayed tax.
 
 **Q: Can I use this for bazaar sales?**
-A: Bazaar has **no 5% tax** — this calculator always applies it. If you're selling via bazaar, use the **Break-even** number as a safe floor but expect more profit than shown.
+A: Bazaar has **no 5% tax** — this calculator always applies it. If selling via bazaar, use **Break-even** as a safe floor but expect more profit than shown.
 
 **Q: What if buy price is 0?**
-A: The calculator handles it. ROI will show `0%` (you can't divide by zero cost), but profit, margin, and break-even still work correctly.
+A: Handled. ROI shows `0%` (can't divide by zero cost), but profit, margin, and break-even all work.
 
 **Q: What if my margin target hits exactly 95%?**
-A: The result is `Infinity` — mathematically unreachable. The calculator shows a warning instead. Stay below 95%.
+A: `Infinity` — mathematically unreachable. Calculator shows a warning. Stay below 95%.
 
 **Q: Can I use fractions of an item?**
-A: Quantity is always rounded down to the nearest integer (`Math.floor`). Torn items come in whole units.
+A: Quantity floors to the nearest integer (`Math.floor`). Torn items are whole units.
 
 **Q: Does it save my values when I close the tab?**
-A: No. Every reload starts fresh. (Could be added later — localStorage would be the move.)
+A: No. Every reload starts fresh.
 
 **Q: Can I use decimals in the sell price?**
-A: Yes — the sell field accepts `0.01` precision. Buy price and quantity round to whole numbers.
+A: Yes — `0.01` precision. Buy price and quantity round to whole numbers.
 
 **Q: Is there an API?**
-A: No, it's a fully client-side single HTML file. No network calls, no tracking, works offline.
+A: No. Fully client-side single HTML file. No calls, no tracking, works offline.
 
 **Q: Why is my margin so much lower than my ROI?**
-A: Because they use different denominators. ROI compares profit to **cost**; margin compares profit to **gross sale**. Since gross sale is always bigger than cost, the same profit produces a smaller percentage. See §4.
+A: Different denominators. ROI compares profit to **cost**; margin compares profit to **gross sale**. Gross sale is bigger → smaller percentage. See §4.
 
 **Q: Can I use this for items I got for free?**
-A: Yes — set buy price to `0`. Your cost is just the extra fees, and profit/margin/break-even all work correctly. ROI will show `0%` since there's no cost to compare against.
+A: Yes — set buy price to `0`. ROI shows `0%`, but everything else works correctly.
 
 ---
 
@@ -333,8 +332,8 @@ A: Yes — set buy price to `0`. Your cost is just the extra fees, and profit/ma
 
 **Need more?**
 
-[Source code](https://github.com/S3THCOD3R) · [Report a bug](https://github.com/S3THCOD3R) · [Contribute](CONTRIBUTING.md)
+[Source](https://github.com/S3THCOD3R) · [Report a kill](https://github.com/S3THCOD3R) · [Enlist](CONTRIBUTING.md)
 
-*Happy flipping.* 🩸
+*Happy hunting.* 🩸
 
 </div>
