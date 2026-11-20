@@ -6,7 +6,7 @@
 
 Enter a sell price to see your real profit, ROI, and margin — or set a target profit % and the calculator solves the exact listing price you need (tax included).
 
-[**Live Demo**](#-live-demo) · [**Guidebook**](GUIDE.md) · [**Contributing**](CONTRIBUTING.md) · [**License**](LICENSE)
+[**Live Demo**](#-live-demo) · [**Guidebook**](https://github.com/S3THCOD3R/Torn-Item-Market-Profit-Calculator/blob/main/Guide.md) · [**Contributing**](CONTRIBUTING.md) · [**License**](LICENSE)
 
 </div>
 
