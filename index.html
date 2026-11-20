@@ -365,6 +365,15 @@
       font-size: 14px;
     }
 
+    .unreachable code {
+      background: rgba(255,255,255,.06);
+      padding: 1px 6px;
+      border-radius: 3px;
+      color: #ffd0c8;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+
     /* ============ API KEY FIELD ============ */
     .key-row {
       display: flex;
@@ -915,8 +924,14 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key }),
     });
-    const data = await res.json();
 
+    // Guard against HTML responses (redirect / catch-all fallback)
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      throw new Error(`Item catalog endpoint returned ${res.status} — not JSON. Check that /api/items proxy is deployed.`);
+    }
+
+    const data = await res.json();
     if (!res.ok) {
       throw new Error(data.error || 'Failed to load item catalog');
     }
@@ -939,11 +954,9 @@
   function resolveItem(input, catalog) {
     const lower = input.toLowerCase();
 
-    // Exact name match
     const exact = catalog.find(it => (it.name || '').toLowerCase() === lower);
     if (exact) return { id: String(exact.id), name: exact.name };
 
-    // Partial match
     const partial = catalog.filter(it => (it.name || '').toLowerCase().includes(lower));
     if (partial.length === 1) {
       return { id: String(partial[0].id), name: partial[0].name };
@@ -975,7 +988,7 @@
 
     let itemId;
 
-    // Numeric input → use as ID directly
+    // Numeric input → use as ID directly (no catalog needed)
     if (/^\d+$/.test(rawInput)) {
       itemId = rawInput;
     } else {
@@ -1011,7 +1024,13 @@
 
         itemId = result.id;
       } catch (err) {
-        els.screenerOut.innerHTML = `<div class="unreachable">Item lookup failed: ${esc(err.message)}</div>`;
+        // Catalog unavailable — offer graceful fallback
+        els.screenerOut.innerHTML = `
+          <div class="unreachable">
+            Item catalog unavailable (${esc(err.message)}).<br>
+            Try entering the item <strong>ID</strong> directly instead (e.g. <code>206</code> for Xanax).
+          </div>
+        `;
         els.scanBtn.disabled = false;
         return;
       }
