@@ -1,14 +1,39 @@
 # netlify.toml
 # Configuration for the Torn Item Market Profit Calculator
-# This file pins deploy settings so they survive re-imports.
+# Pins deploy settings, security headers, and the API proxy function.
 
+# ─────────────────────────────────────────────────────────────
+# BUILD SETTINGS
+# ─────────────────────────────────────────────────────────────
 [build]
-  # No build command is needed for this static site.
+  # No build command — this is a pure static site.
   command = ""
-  # The publish directory is the root of the repository.
+  # Serve files from the repository root (where index.html lives).
   publish = "."
 
-# Optional: Add security headers for all pages.
+# ─────────────────────────────────────────────────────────────
+# SERVERLESS FUNCTIONS
+# ─────────────────────────────────────────────────────────────
+[functions]
+  # Directory where Netlify looks for serverless functions.
+  directory = "netlify/functions"
+  # Bundle each function with esbuild for faster cold starts.
+  node_bundler = "esbuild"
+
+# ─────────────────────────────────────────────────────────────
+# API PROXY REDIRECTS
+# ⚠️ ORDER MATTERS — this MUST come before the catch-all below.
+# Netlify evaluates redirects top-to-bottom and uses the first match.
+# ─────────────────────────────────────────────────────────────
+[[redirects]]
+  from = "/api/market"
+  to = "/.netlify/functions/torn-proxy"
+  status = 200
+  force = true
+
+# ─────────────────────────────────────────────────────────────
+# SECURITY HEADERS
+# ─────────────────────────────────────────────────────────────
 [[headers]]
   for = "/*"
   [headers.values]
@@ -16,8 +41,11 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-# Optional: A catch-all redirect to index.html.
-# Not strictly required for a single-page site, but it's a safe fallback.
+# ─────────────────────────────────────────────────────────────
+# CATCH-ALL FALLBACK
+# ⚠️ THIS MUST COME LAST. If it came first, it would swallow
+# /api/market and the proxy function would never be reached.
+# ─────────────────────────────────────────────────────────────
 [[redirects]]
   from = "/*"
   to = "/index.html"
