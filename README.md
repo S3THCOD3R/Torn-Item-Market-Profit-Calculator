@@ -10,7 +10,7 @@
 
 Enter a sell price to expose your real profit, ROI, and margin — or feed it a target profit % and it back-solves the exact listing price you need.
 
-[**⚔️ LIVE OPS**](https://s3thcod3r.github.io/Torn-Item-Market-Profit-Calculator/) · [**📖 FIELD MANUAL**](Guide.md) · [**🛡️ ENLIST**](CONTRIBUTING.md) · [**📜 ARMISTICE**](LICENSE) · [**💚 FUND THE CAUSE**](https://cash.app/$SethKhaneki)
+[**⚔️ LIVE OPS**](https://profitcalc4torn.netlify.app) · [**📖 FIELD MANUAL**](Guide.md) · [**🛡️ ENLIST**](CONTRIBUTING.md) · [**📜 ARMISTICE**](LICENSE) · [**💚 FUND THE CAUSE**](https://cash.app/$SethKhaneki)
 
 </div>
 
@@ -32,7 +32,19 @@ Enter a sell price to expose your real profit, ROI, and margin — or feed it a 
 
 ## ⚔️ LIVE OPS
 
-No install. No build. No server. **Open `index.html` and you're in.**
+> **The calculator is running at:**
+>
+> ### [🩸 Launch the Calculator →](https://profitcalc4torn.netlify.app)
+>
+> `https://profitcalc4torn.netlify.app`
+
+No install. No build. No login. Opens in your browser and fires immediately.
+
+---
+
+## 🛠 DEPLOYMENT — run it locally
+
+No server required. **Open `index.html` and you're in.**
 
 ```bash
 git clone https://github.com/S3THCOD3R/Torn-Item-Market-Profit-Calculator.git
@@ -106,6 +118,7 @@ Any lower → you miss the target. Any higher → you're bleeding margin.
 - **CSS3** — custom properties, grid, `:has()`, `clip-path`
 - **Vanilla JavaScript** — no framework, no bundler, no build
 - **Google Fonts** — *Staatliches* + *Barlow Condensed*
+- **Hosted on Netlify** — static deploy, auto-redeploy on `git push`
 
 **Payload:** one file, ~30 KB. That's the entire operation.
 
