@@ -1,0 +1,24 @@
+# netlify.toml
+# Configuration for the Torn Item Market Profit Calculator
+# This file pins deploy settings so they survive re-imports.
+
+[build]
+  # No build command is needed for this static site.
+  command = ""
+  # The publish directory is the root of the repository.
+  publish = "."
+
+# Optional: Add security headers for all pages.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Optional: A catch-all redirect to index.html.
+# Not strictly required for a single-page site, but it's a safe fallback.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
