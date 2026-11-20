@@ -424,6 +424,38 @@
       color: #ff9a8a;
     }
 
+    /* ============ ITEM SUGGESTIONS ============ */
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .suggestion {
+      padding: 6px 12px;
+      border: 1px solid var(--border-2);
+      border-radius: 4px;
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color .15s, color .15s, background .15s;
+    }
+
+    .suggestion:hover {
+      border-color: var(--red-2);
+      color: #ff9a8a;
+      background: rgba(192,57,43,.12);
+    }
+
+    .suggestion small {
+      color: var(--muted);
+      font-weight: 400;
+      margin-left: 4px;
+    }
+
     /* ============ FOOTER ============ */
     .footer {
       text-align: center;
@@ -622,13 +654,13 @@
           <button type="button" id="keyClear" class="key-clear" title="Clear saved key" aria-label="Clear saved API key">✕</button>
         </div>
         <div class="result-sub" style="margin-top:6px;">
-          Your key stays in this browser. It's forwarded to Torn via our proxy and never stored on the server. Use a <strong>Public</strong> or <strong>Minimal</strong> access key.
+          Your key stays in this browser. It's forwarded to Torn via our proxy and never stored on the server. Use a <strong>Public</strong> or <strong>Minimal</strong> access key with <code>torn → items</code> permission for name lookup.
         </div>
       </div>
 
       <div class="field full">
-        <label for="itemId">Item ID</label>
-        <input id="itemId" type="number" min="1" step="1" value="206" placeholder="e.g. 206 for Xanax">
+        <label for="itemId">Item ID or Name</label>
+        <input id="itemId" type="text" placeholder="e.g. Xanax or 206" autocomplete="off" spellcheck="false">
       </div>
 
       <div class="full">
@@ -636,7 +668,7 @@
       </div>
 
       <div class="full" id="screenerOut" style="overflow-x:auto;">
-        <div class="result-sub">Enter your API key, set an item ID, and click Scan Market.</div>
+        <div class="result-sub">Enter your API key, set an item ID or name, and click Scan Market.</div>
       </div>
     </section>
 
@@ -857,21 +889,134 @@
   } catch {}
 
   // ────────────────────────────────────────────────────────
+  // ITEM CATALOG — fetch once, cache in localStorage
+  // ────────────────────────────────────────────────────────
+  const CATALOG_STORAGE = 'profitcalc4torn_item_catalog';
+  let catalogCache = null;
+  let catalogKey = null;
+
+  async function getItemCatalog(key) {
+    if (catalogCache && catalogKey === key) return catalogCache;
+
+    try {
+      const stored = localStorage.getItem(CATALOG_STORAGE);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.key === key && parsed.expires > Date.now()) {
+          catalogCache = parsed.items;
+          catalogKey = key;
+          return catalogCache;
+        }
+      }
+    } catch {}
+
+    const res = await fetch('/api/items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to load item catalog');
+    }
+
+    const items = data.items || [];
+    catalogCache = items;
+    catalogKey = key;
+
+    try {
+      localStorage.setItem(CATALOG_STORAGE, JSON.stringify({
+        key,
+        expires: Date.now() + 60 * 60 * 1000, // 1 hour
+        items,
+      }));
+    } catch {}
+
+    return items;
+  }
+
+  function resolveItem(input, catalog) {
+    const lower = input.toLowerCase();
+
+    // Exact name match
+    const exact = catalog.find(it => (it.name || '').toLowerCase() === lower);
+    if (exact) return { id: String(exact.id), name: exact.name };
+
+    // Partial match
+    const partial = catalog.filter(it => (it.name || '').toLowerCase().includes(lower));
+    if (partial.length === 1) {
+      return { id: String(partial[0].id), name: partial[0].name };
+    }
+    if (partial.length > 1) {
+      return { multiple: partial.slice(0, 12).map(it => ({ id: it.id, name: it.name })) };
+    }
+
+    return { notFound: true };
+  }
+
+  // ────────────────────────────────────────────────────────
   // LIVE MARKET SCREENER
   // ────────────────────────────────────────────────────────
   els.scanBtn.addEventListener('click', async () => {
-    const itemId = els.itemId.value.trim();
+    const rawInput = els.itemId.value.trim();
 
     if (!realKey) {
       els.screenerOut.innerHTML = `<div class="unreachable">Enter your Torn API key above first.</div>`;
       return;
     }
-    if (!itemId) {
-      els.screenerOut.innerHTML = `<div class="unreachable">Enter an item ID.</div>`;
+    if (!rawInput) {
+      els.screenerOut.innerHTML = `<div class="unreachable">Enter an item ID or name.</div>`;
       return;
     }
 
     els.scanBtn.disabled = true;
+    els.screenerOut.innerHTML = '<div class="result-sub">Resolving item…</div>';
+
+    let itemId;
+
+    // Numeric input → use as ID directly
+    if (/^\d+$/.test(rawInput)) {
+      itemId = rawInput;
+    } else {
+      // Text input → resolve via catalog
+      try {
+        const catalog = await getItemCatalog(realKey);
+        const result = resolveItem(rawInput, catalog);
+
+        if (result.notFound) {
+          els.screenerOut.innerHTML = `<div class="unreachable">Item "${esc(rawInput)}" not found. Try a different name or use the item ID.</div>`;
+          els.scanBtn.disabled = false;
+          return;
+        }
+
+        if (result.multiple) {
+          let html = `<div class="result-sub" style="margin-bottom:8px;">Multiple matches for "${esc(rawInput)}" — pick one:</div><div class="suggestions">`;
+          result.multiple.forEach(it => {
+            html += `<button type="button" class="suggestion" data-id="${esc(String(it.id))}" data-name="${esc(it.name)}">${esc(it.name)} <small>#${esc(String(it.id))}</small></button>`;
+          });
+          html += '</div>';
+          els.screenerOut.innerHTML = html;
+
+          els.screenerOut.querySelectorAll('.suggestion').forEach(btn => {
+            btn.addEventListener('click', () => {
+              els.itemId.value = btn.dataset.id;
+              els.scanBtn.click();
+            });
+          });
+
+          els.scanBtn.disabled = false;
+          return;
+        }
+
+        itemId = result.id;
+      } catch (err) {
+        els.screenerOut.innerHTML = `<div class="unreachable">Item lookup failed: ${esc(err.message)}</div>`;
+        els.scanBtn.disabled = false;
+        return;
+      }
+    }
+
     els.screenerOut.innerHTML = '<div class="result-sub">Scanning market…</div>';
 
     try {
@@ -887,7 +1032,6 @@
         return;
       }
 
-      // Torn v2 shape: data.itemmarket.listings is the array
       const market    = data.itemmarket || {};
       const itemMeta  = market.item || {};
       const listings  = market.listings || [];
