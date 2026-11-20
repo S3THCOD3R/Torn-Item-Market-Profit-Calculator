@@ -208,6 +208,16 @@
       outline-offset: 2px;
     }
 
+    /* Plain pill button (non-radio) */
+    button.pill {
+      appearance: none;
+      font-family: inherit;
+    }
+    button.pill:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
     /* ============ FORM ============ */
     .form-grid {
       display: grid;
@@ -353,6 +363,65 @@
       border-radius: 4px;
       color: #ffb8ad;
       font-size: 14px;
+    }
+
+    /* ============ API KEY FIELD ============ */
+    .key-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .key-row input {
+      flex: 1;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 3px;
+      font-size: 15px;
+    }
+
+    .key-clear {
+      flex: 0 0 auto;
+      padding: 0 14px;
+      background: var(--panel-2);
+      border: 1px solid var(--border-2);
+      border-radius: 4px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      transition: border-color .15s, color .15s;
+    }
+
+    .key-clear:hover { border-color: var(--red); color: var(--red-2); }
+
+    /* ============ SCREENER ============ */
+    .screener-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .screener-table thead tr {
+      border-bottom: 1px solid var(--border-2);
+      color: var(--muted);
+      text-align: left;
+    }
+
+    .screener-table th,
+    .screener-table td {
+      padding: 8px 6px;
+      text-align: left;
+    }
+
+    .screener-table tbody tr {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .screener-table tbody tr:hover {
+      background: rgba(192,57,43,.06);
+    }
+
+    .screener-table td.price {
+      font-weight: 700;
+      color: #ff9a8a;
     }
 
     /* ============ FOOTER ============ */
@@ -528,6 +597,49 @@
       <div class="result-sub">Enter values to see results.</div>
     </section>
 
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- LIVE MARKET SCREENER                               -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <section class="card form-grid" id="screenerCard">
+      <div class="card-label full">Live Market Screener</div>
+
+      <div class="field full">
+        <label for="apiKey">
+          Torn API Key
+          <span class="lock-badge" id="keySaved" hidden>SAVED</span>
+        </label>
+        <div class="key-row">
+          <input
+            id="apiKey"
+            type="text"
+            placeholder="Paste Public or Minimal access key"
+            autocomplete="off"
+            spellcheck="false"
+            autocapitalize="off"
+            autocorrect="off"
+            inputmode="text"
+          >
+          <button type="button" id="keyClear" class="key-clear" title="Clear saved key" aria-label="Clear saved API key">✕</button>
+        </div>
+        <div class="result-sub" style="margin-top:6px;">
+          Your key stays in this browser. It's forwarded to Torn via our proxy and never stored on the server. Use a <strong>Public</strong> or <strong>Minimal</strong> access key.
+        </div>
+      </div>
+
+      <div class="field full">
+        <label for="itemId">Item ID</label>
+        <input id="itemId" type="number" min="1" step="1" value="206" placeholder="e.g. 206 for Xanax">
+      </div>
+
+      <div class="full">
+        <button type="button" id="scanBtn" class="pill" style="width:100%;">Scan Market</button>
+      </div>
+
+      <div class="full" id="screenerOut" style="overflow-x:auto;">
+        <div class="result-sub">Enter your API key, set an item ID, and click Scan Market.</div>
+      </div>
+    </section>
+
     <footer class="footer">
       <div class="footer-brand">Torn · Item Market Profit Calculator</div>
       <div class="footer-links">
@@ -555,7 +667,9 @@
   const els = {
     item: $('item'), buy: $('buy'), qty: $('qty'), fees: $('fees'),
     sell: $('sell'), pct: $('pct'), perItem: $('perItem'),
-    sellLock: $('sellLock'), pctLock: $('pctLock'), out: $('out')
+    sellLock: $('sellLock'), pctLock: $('pctLock'), out: $('out'),
+    apiKey: $('apiKey'), keyClear: $('keyClear'), keySaved: $('keySaved'),
+    itemId: $('itemId'), scanBtn: $('scanBtn'), screenerOut: $('screenerOut')
   };
 
   const fmt    = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -564,6 +678,9 @@
   const esc    = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const radio  = name => document.querySelector(`input[name="${name}"]:checked`).value;
 
+  // ────────────────────────────────────────────────────────
+  // CALCULATOR
+  // ────────────────────────────────────────────────────────
   function state() {
     const buy  = Math.max(0, +els.buy.value  || 0);
     const qty  = Math.max(1, Math.floor(+els.qty.value) || 1);
@@ -676,6 +793,141 @@
     update();
   }));
 
+  // ────────────────────────────────────────────────────────
+  // API KEY FIELD — masked with #, saved to localStorage
+  // ────────────────────────────────────────────────────────
+  const KEY_STORAGE = 'profitcalc4torn_api_key';
+  let realKey = '';
+  let displayLen = 0;
+
+  function renderMaskedKey() {
+    els.apiKey.value = '#'.repeat(realKey.length);
+    els.apiKey.setSelectionRange(realKey.length, realKey.length);
+    displayLen = realKey.length;
+    if (realKey) {
+      try { localStorage.setItem(KEY_STORAGE, realKey); } catch {}
+    } else {
+      try { localStorage.removeItem(KEY_STORAGE); } catch {}
+    }
+    els.keySaved.hidden = !realKey;
+  }
+
+  els.apiKey.addEventListener('input', () => {
+    const newLen = els.apiKey.value.length;
+    if (newLen > displayLen) {
+      // Typed or pasted — new chars are after the old display
+      const newChars = els.apiKey.value.slice(displayLen);
+      realKey += newChars;
+    } else if (newLen < displayLen) {
+      // Deleted — remove from end
+      const removed = displayLen - newLen;
+      realKey = realKey.slice(0, realKey.length - removed);
+    }
+    renderMaskedKey();
+  });
+
+  // Explicit paste handler for deterministic append behavior
+  els.apiKey.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const pasted = (e.clipboardData || window.clipboardData).getData('text').trim();
+    if (pasted) {
+      realKey += pasted;
+      renderMaskedKey();
+    }
+  });
+
+  // Prevent cursor movement to middle of masked field (only end editable)
+  els.apiKey.addEventListener('click', () => {
+    els.apiKey.setSelectionRange(realKey.length, realKey.length);
+  });
+  els.apiKey.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft' || e.key === 'Home') {
+      // Allow but snap back to end after
+      setTimeout(() => els.apiKey.setSelectionRange(realKey.length, realKey.length), 0);
+    }
+  });
+
+  els.keyClear.addEventListener('click', () => {
+    realKey = '';
+    renderMaskedKey();
+    els.apiKey.focus();
+  });
+
+  // Load any saved key on page load
+  try {
+    const saved = localStorage.getItem(KEY_STORAGE);
+    if (saved) {
+      realKey = saved;
+      renderMaskedKey();
+    }
+  } catch {}
+
+  // ────────────────────────────────────────────────────────
+  // LIVE MARKET SCREENER
+  // ────────────────────────────────────────────────────────
+  els.scanBtn.addEventListener('click', async () => {
+    const itemId = els.itemId.value.trim();
+
+    if (!realKey) {
+      els.screenerOut.innerHTML = `<div class="unreachable">Enter your Torn API key above first.</div>`;
+      return;
+    }
+    if (!itemId) {
+      els.screenerOut.innerHTML = `<div class="unreachable">Enter an item ID.</div>`;
+      return;
+    }
+
+    els.scanBtn.disabled = true;
+    els.screenerOut.innerHTML = '<div class="result-sub">Scanning market…</div>';
+
+    try {
+      const res = await fetch('/api/market', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId, key: realKey }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        els.screenerOut.innerHTML = `<div class="unreachable">Error: ${esc(data.error || 'Unknown error')}</div>`;
+        return;
+      }
+
+      const listings = data.itemmarket || [];
+      if (!listings.length) {
+        els.screenerOut.innerHTML = '<div class="result-sub">No listings found for this item.</div>';
+        return;
+      }
+
+      let html = `<table class="screener-table">
+        <thead><tr>
+          <th>#</th><th>Price / unit</th><th>Qty</th><th>Total</th>
+        </tr></thead><tbody>`;
+
+      listings.forEach((l, i) => {
+        const unit  = l.cost || 0;
+        const qty   = l.quantity || 0;
+        const total = unit * qty;
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td class="price">${money(unit)}</td>
+          <td>${intFmt.format(qty)}</td>
+          <td>${money(total)}</td>
+        </tr>`;
+      });
+
+      html += '</tbody></table>';
+      els.screenerOut.innerHTML = html;
+    } catch (err) {
+      els.screenerOut.innerHTML = '<div class="unreachable">Network error — is the proxy function deployed?</div>';
+    } finally {
+      els.scanBtn.disabled = false;
+    }
+  });
+
+  // ────────────────────────────────────────────────────────
+  // INIT
+  // ────────────────────────────────────────────────────────
   applyLocks();
   update();
 })();
