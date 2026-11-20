@@ -10,7 +10,7 @@
 
 Enter a sell price to expose your real profit, ROI, and margin — or feed it a target profit % and it back-solves the exact listing price you need.
 
-[**⚔️ LIVE OPS**](#-live-ops) · [**📖 FIELD MANUAL**](Guide.md) · [**🛡️ ENLIST**](CONTRIBUTING.md) · [**📜 ARMISTICE**](LICENSE) · [**💚 FUND THE CAUSE**](https://cash.app/$SethKhaneki)
+[**⚔️ LIVE OPS**](https://s3thcod3r.github.io/Torn-Item-Market-Profit-Calculator/) · [**📖 FIELD MANUAL**](Guide.md) · [**🛡️ ENLIST**](CONTRIBUTING.md) · [**📜 ARMISTICE**](LICENSE) · [**💚 FUND THE CAUSE**](https://cash.app/$SethKhaneki)
 
 </div>
 
