@@ -1,0 +1,48 @@
+// netlify/functions/items-proxy.js
+// Returns Torn's full item catalog for name → ID resolution.
+// POST body: { key }
+
+const TORN_API_BASE = 'https://api.torn.com/v2';
+
+export async function handler(event) {
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
+  }
+
+  let body;
+  try {
+    body = JSON.parse(event.body || '{}');
+  } catch {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON body' }) };
+  }
+
+  const { key } = body;
+  if (!key || typeof key !== 'string') {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Missing API key' }) };
+  }
+
+  const url = `${TORN_API_BASE}/torn/items?key=${encodeURIComponent(key)}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.error) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: data.error.error || 'Torn API error' }),
+      };
+    }
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600', // catalog changes rarely
+      },
+      body: JSON.stringify(data),
+    };
+  } catch {
+    return { statusCode: 502, body: JSON.stringify({ error: 'Failed to reach Torn API' }) };
+  }
+}
