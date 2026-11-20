@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Torn · Item Market Profit Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Staatliches&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --panel: #131313;
+      --panel-2: #1a1a1a;
+      --border: #262626;
+      --border-2: #383838;
+      --text: #d8d8d8;
+      --muted: #8a8a8a;
+      --red: #c0392b;
+      --red-2: #e74c3c;
+      --green: #2ecc71;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Barlow Condensed', system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(192,57,43,.05), transparent 50%),
+        radial-gradient(circle at 80% 100%, rgba(192,57,43,.03), transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* ============ HERO ============ */
+    .hero {
+      position: relative;
+      padding: 48px 20px 72px;
+      text-align: center;
+      background:
+        radial-gradient(ellipse 80% 100% at 50% 0%, rgba(192,57,43,.4), transparent 65%),
+        linear-gradient(180deg, #1c0f0d 0%, #0e0706 80%, #0a0505 100%);
+      clip-path: polygon(
+        0 0, 100% 0, 100% 86%,
+        96% 92%, 92% 87%, 88% 93%, 84% 88%, 80% 94%,
+        76% 89%, 72% 93%, 68% 86%, 64% 91%, 60% 88%,
+        56% 94%, 52% 89%, 48% 92%, 44% 86%, 40% 93%,
+        36% 88%, 32% 91%, 28% 86%, 24% 94%, 20% 89%,
+        16% 92%, 12% 87%, 8% 93%, 4% 88%, 0 91%
+      );
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(45deg, rgba(255,255,255,.015) 0 1px, transparent 1px 3px);
+      pointer-events: none;
+    }
+
+    .hero-inner { position: relative; max-width: 900px; margin: 0 auto; }
+
+    .brand {
+      font-family: 'Staatliches', Impact, sans-serif;
+      font-size: clamp(64px, 14vw, 140px);
+      font-weight: 400;
+      letter-spacing: .15em;
+      text-indent: .15em;
+      margin: 0 0 4px;
+      line-height: .9;
+      color: #e74c3c;
+      text-shadow:
+        0 0 12px rgba(231,76,60,.8),
+        0 0 32px rgba(192,57,43,.6),
+        0 0 80px rgba(192,57,43,.35),
+        2px 2px 0 #3a0806;
+      -webkit-text-stroke: 1px rgba(255,130,110,.15);
+    }
+
+    .brand-sub {
+      font-size: clamp(12px, 1.8vw, 16px);
+      font-weight: 500;
+      letter-spacing: .22em;
+      margin: 18px 0 0;
+      color: #9a8484;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0 4px;
+    }
+
+    .brand-sub .sep { color: var(--red-2); margin: 0 6px; }
+
+    .brand-sub .by {
+      color: #6a5a5a;
+      margin-left: 6px;
+      font-size: 0.85em;
+      letter-spacing: .18em;
+    }
+
+    .brand-sub .by a {
+      color: var(--red-2);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(231,76,60,.35);
+      padding-bottom: 1px;
+      transition: color .15s, border-color .15s, text-shadow .15s;
+    }
+
+    .brand-sub .by a:hover,
+    .brand-sub .by a:focus-visible {
+      color: #ff8f7c;
+      border-bottom-color: #ff8f7c;
+      text-shadow: 0 0 10px rgba(231,76,60,.6);
+      outline: none;
+    }
+
+    /* ============ LAYOUT ============ */
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 16px 64px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.03),
+        0 2px 12px rgba(0,0,0,.3);
+    }
+
+    .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    /* ============ PILL RADIOS ============ */
+    .pills { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .pill {
+      position: relative;
+      flex: 1;
+      min-width: 140px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border: 1px solid var(--border-2);
+      border-radius: 4px;
+      cursor: pointer;
+      background: var(--panel-2);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      text-align: center;
+      user-select: none;
+      transition: border-color .15s, color .15s, background .15s, box-shadow .15s;
+    }
+
+    .pill input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .pill:hover { border-color: var(--red); color: var(--text); }
+
+    .pill:has(input:checked) {
+      background: linear-gradient(180deg, #b52e21 0%, #7a1a10 100%);
+      border-color: var(--red-2);
+      color: #fff;
+      box-shadow:
+        0 0 0 1px rgba(231,76,60,.4),
+        0 0 16px rgba(192,57,43,.35),
+        inset 0 1px 0 rgba(255,255,255,.1);
+      text-shadow: 0 1px 2px rgba(0,0,0,.5);
+    }
+
+    .pill:has(input:focus-visible) {
+      outline: 2px solid var(--red-2);
+      outline-offset: 2px;
+    }
+
+    /* ============ FORM ============ */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-grid .full { grid-column: 1 / -1; }
+
+    .field label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .lock-badge {
+      font-size: 10px;
+      color: var(--red-2);
+      letter-spacing: .1em;
+      text-shadow: 0 0 6px rgba(231,76,60,.6);
+    }
+
+    .field input {
+      width: 100%;
+      padding: 10px 12px;
+      background: #0d0d0d;
+      border: 1px solid var(--border-2);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    .field input:hover { border-color: #4a4a4a; }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--red-2);
+      box-shadow: 0 0 0 2px rgba(231,76,60,.2);
+    }
+
+    .field input[readonly] {
+      background: #0a0808;
+      border: 1px dashed #3d2220;
+      color: #ff9a8a;
+      cursor: default;
+    }
+
+    .field input[readonly]:focus { box-shadow: none; border-color: #3d2220; }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .check input { accent-color: var(--red-2); width: 16px; height: 16px; cursor: pointer; }
+
+    /* ============ RESULTS ============ */
+    .result-head {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+
+    .result-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .result-item { font-size: 18px; font-weight: 700; letter-spacing: .02em; }
+
+    .result-tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--red-2);
+      padding: 3px 8px;
+      border: 1px solid rgba(231,76,60,.4);
+      border-radius: 3px;
+      background: rgba(192,57,43,.1);
+      white-space: nowrap;
+    }
+
+    .result-profit { display: flex; align-items: baseline; gap: 6px; }
+
+    .result-profit-value {
+      font-family: 'Staatliches', sans-serif;
+      font-size: 42px;
+      line-height: 1;
+      letter-spacing: .03em;
+    }
+
+    .result-profit-value.profit { color: var(--green); text-shadow: 0 0 20px rgba(46,204,113,.3); }
+    .result-profit-value.loss   { color: var(--red-2); text-shadow: 0 0 20px rgba(231,76,60,.35); }
+
+    .result-sub { font-size: 12px; color: var(--muted); letter-spacing: .05em; }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 6px 0;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,.03);
+    }
+
+    .row:last-child { border-bottom: none; }
+    .row span { color: var(--muted); }
+    .row strong { font-weight: 600; color: var(--text); }
+    .row strong.profit { color: var(--green); }
+    .row strong.loss   { color: var(--red-2); }
+    .row strong.neg    { color: #e88; }
+
+    .row.divider {
+      margin-top: 6px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      border-bottom: none;
+    }
+
+    .unreachable {
+      padding: 14px;
+      border: 1px solid rgba(231,76,60,.4);
+      background: rgba(192,57,43,.1);
+      border-radius: 4px;
+      color: #ffb8ad;
+      font-size: 14px;
+    }
+
+    /* ============ FOOTER ============ */
+    .footer {
+      text-align: center;
+      padding: 28px 0 0;
+      margin-top: 8px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .footer-brand {
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: #5a5a5a;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .footer-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: #7a6a6a;
+      text-decoration: none;
+      padding: 4px 0;
+      border-bottom: 1px dashed transparent;
+      transition: color .15s, border-color .15s, text-shadow .15s;
+    }
+
+    .footer-links a svg {
+      transition: transform .15s, color .15s;
+    }
+
+    .footer-links a:hover,
+    .footer-links a:focus-visible {
+      color: var(--red-2);
+      border-bottom-color: rgba(231,76,60,.4);
+      text-shadow: 0 0 10px rgba(231,76,60,.5);
+      outline: none;
+    }
+
+    .footer-links a:hover svg {
+      transform: rotate(-8deg) scale(1.1);
+      color: var(--red-2);
+    }
+
+    .footer-donate {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      padding: 10px 20px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: #fff;
+      background: linear-gradient(180deg, #00d64f 0%, #00a83e 100%);
+      border: 1px solid #00e859;
+      border-radius: 4px;
+      box-shadow:
+        0 0 0 1px rgba(0,214,79,.35),
+        0 0 18px rgba(0,214,79,.35),
+        inset 0 1px 0 rgba(255,255,255,.2);
+      text-shadow: 0 1px 2px rgba(0,0,0,.4);
+      transition: transform .15s, box-shadow .15s, filter .15s;
+    }
+
+    .footer-donate:hover,
+    .footer-donate:focus-visible {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+      box-shadow:
+        0 0 0 1px rgba(0,230,90,.5),
+        0 0 28px rgba(0,230,90,.55),
+        inset 0 1px 0 rgba(255,255,255,.25);
+      outline: none;
+    }
+
+    .footer-donate svg {
+      flex-shrink: 0;
+      transition: transform .15s;
+    }
+
+    .footer-donate:hover svg { transform: scale(1.15); }
+
+    @media (max-width: 540px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .hero { padding: 32px 16px 60px; }
+      .result-profit-value { font-size: 34px; }
+      .pill { min-width: 0; flex: 1; font-size: 13px; padding: 9px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <h1 class="brand">TORN</h1>
+      <p class="brand-sub">
+        Torn <span class="sep">·</span> Item Market Profit Calculator
+        <span class="by">by <a href="https://github.com/S3THCOD3R" target="_blank" rel="noopener noreferrer">S3THCOD3R</a></span>
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="card-label">Mode</div>
+      <div class="pills">
+        <label class="pill"><input type="radio" name="mode" value="sell" checked>Enter sell price</label>
+        <label class="pill"><input type="radio" name="mode" value="pct">Set profit by %</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-label">Profit % basis</div>
+      <div class="pills">
+        <label class="pill"><input type="radio" name="basis" value="markup" checked>Markup on cost</label>
+        <label class="pill"><input type="radio" name="basis" value="margin">Margin on sale</label>
+      </div>
+    </section>
+
+    <section class="card form-grid">
+      <div class="field full">
+        <label for="item">Item name</label>
+        <input id="item" type="text" placeholder="e.g. Xanax" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="buy">Buy price / item</label>
+        <input id="buy" type="number" min="0" step="1" value="0">
+      </div>
+      <div class="field">
+        <label for="qty">Quantity</label>
+        <input id="qty" type="number" min="1" step="1" value="1">
+      </div>
+      <div class="field">
+        <label for="sell">Sell price / item <span class="lock-badge" id="sellLock" hidden>LOCKED</span></label>
+        <input id="sell" type="number" min="0" step="0.01" value="0">
+      </div>
+      <div class="field">
+        <label for="pct">Profit % <span class="lock-badge" id="pctLock" hidden>LOCKED</span></label>
+        <input id="pct" type="number" step="0.01" value="0" readonly>
+      </div>
+      <div class="field full">
+        <label for="fees">Extra fees / costs</label>
+        <input id="fees" type="number" min="0" step="1" value="0">
+      </div>
+      <div class="full">
+        <label class="check">
+          <input id="perItem" type="checkbox">
+          Round 5% tax down per item (display only)
+        </label>
+      </div>
+    </section>
+
+    <section class="card" id="out">
+      <div class="result-sub">Enter values to see results.</div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-brand">Torn · Item Market Profit Calculator</div>
+      <div class="footer-links">
+        <a href="https://github.com/S3THCOD3R" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          Source on GitHub
+        </a>
+      </div>
+      <a class="footer-donate" href="https://cash.app/$SethKhaneki" target="_blank" rel="noopener noreferrer" aria-label="Support future works via Cash App">
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+        Support Future Works
+      </a>
+    </footer>
+  </main>
+
+<script>
+(() => {
+  const TAX = 0.05;
+  const $ = id => document.getElementById(id);
+
+  const els = {
+    item: $('item'), buy: $('buy'), qty: $('qty'), fees: $('fees'),
+    sell: $('sell'), pct: $('pct'), perItem: $('perItem'),
+    sellLock: $('sellLock'), pctLock: $('pctLock'), out: $('out')
+  };
+
+  const fmt    = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const intFmt = new Intl.NumberFormat();
+  const money  = n => '$' + fmt.format(n);
+  const esc    = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const radio  = name => document.querySelector(`input[name="${name}"]:checked`).value;
+
+  function state() {
+    const buy  = Math.max(0, +els.buy.value  || 0);
+    const qty  = Math.max(1, Math.floor(+els.qty.value) || 1);
+    const fees = Math.max(0, +els.fees.value || 0);
+    const sell = Math.max(0, +els.sell.value || 0);
+    const pct  = +els.pct.value || 0;
+    return { buy, qty, fees, sell, pct, cost: buy * qty + fees };
+  }
+
+  function pctFromSell(sell, basis, cost, qty) {
+    const gross  = sell * qty;
+    const profit = gross * (1 - TAX) - cost;
+    if (basis === 'markup') return cost > 0 ? (profit / cost) * 100 : 0;
+    return gross > 0 ? (profit / gross) * 100 : 0;
+  }
+
+  function sellFromPct(pct, basis, cost, qty) {
+    const p = pct / 100;
+    if (basis === 'markup') return (cost * (1 + p)) / (1 - TAX) / qty;
+    const d = (1 - TAX) - p;
+    return d <= 0 ? Infinity : (cost / d) / qty;
+  }
+
+  function sync() {
+    const s = state();
+    const basis = radio('basis');
+    if (radio('mode') === 'pct') {
+      const sell = sellFromPct(s.pct, basis, s.cost, s.qty);
+      const v = isFinite(sell) ? sell.toFixed(2) : '';
+      if (els.sell.value !== v) els.sell.value = v;
+    } else if (s.sell > 0) {
+      const p = pctFromSell(s.sell, basis, s.cost, s.qty);
+      const v = isFinite(p) ? p.toFixed(2) : '';
+      if (els.pct.value !== v) els.pct.value = v;
+    }
+  }
+
+  function render() {
+    const s = state();
+    const basis = radio('basis');
+    const mode  = radio('mode');
+
+    if (mode === 'pct' && basis === 'margin' && s.pct >= 95) {
+      els.out.innerHTML = `<div class="unreachable">⚠ Target unreachable — a ${s.pct}% margin can't survive the 5% sales tax. Lower it below 95%.</div>`;
+      return;
+    }
+
+    const gross     = s.sell * s.qty;
+    const tax       = els.perItem.checked ? Math.floor(s.sell * TAX) * s.qty : gross * TAX;
+    const net       = gross - tax;
+    const profit    = net - s.cost;
+    const ppi       = s.qty ? profit / s.qty : 0;
+    const roi       = s.cost > 0 ? (profit / s.cost) * 100 : 0;
+    const margin    = gross > 0 ? (profit / gross) * 100 : 0;
+    const breakEven = s.qty ? s.cost / (s.qty * (1 - TAX)) : 0;
+    const cls       = profit >= 0 ? 'profit' : 'loss';
+    const sign      = profit >= 0 ? '+' : '−';
+    const item      = esc(els.item.value.trim() || 'Item');
+
+    let tag, sub;
+    if (mode === 'pct') {
+      tag = `TARGET ${s.pct.toFixed(2)}% ${basis === 'markup' ? 'ROI' : 'MARGIN'}`;
+      sub = `Sell at ${money(s.sell)} each · Qty ${intFmt.format(s.qty)}`;
+    } else {
+      tag = `SELL ${money(s.sell)}`;
+      const p = pctFromSell(s.sell, basis, s.cost, s.qty);
+      sub = `${basis === 'markup' ? 'ROI on cost' : 'Margin on sale'}: ${p.toFixed(2)}% · Qty ${intFmt.format(s.qty)}`;
+    }
+
+    els.out.innerHTML = `
+      <div class="result-head">
+        <div class="result-top">
+          <span class="result-item">${item}</span>
+          <span class="result-tag">${tag}</span>
+        </div>
+        <div class="result-profit">
+          <span class="result-profit-value ${cls}">${sign}${money(Math.abs(profit))}</span>
+        </div>
+        <div class="result-sub">${sub}</div>
+      </div>
+      <div class="row"><span>Gross sale</span><strong>${money(gross)}</strong></div>
+      <div class="row"><span>Sales tax (5%)</span><strong class="neg">−${money(tax)}</strong></div>
+      <div class="row"><span>Net revenue</span><strong>${money(net)}</strong></div>
+      <div class="row"><span>Total cost</span><strong class="neg">−${money(s.cost)}</strong></div>
+      <div class="row divider"><span>Profit / item</span><strong class="${cls}">${money(ppi)}</strong></div>
+      <div class="row"><span>ROI on cost</span><strong class="${cls}">${roi.toFixed(2)}%</strong></div>
+      <div class="row"><span>Margin on sale</span><strong class="${cls}">${margin.toFixed(2)}%</strong></div>
+      <div class="row divider"><span>Break-even sell price</span><strong>${money(breakEven)}</strong></div>
+    `;
+  }
+
+  function applyLocks() {
+    const pctMode = radio('mode') === 'pct';
+    els.sell.readOnly    = pctMode;
+    els.pct.readOnly     = !pctMode;
+    els.sellLock.hidden  = !pctMode;
+    els.pctLock.hidden   = pctMode;
+  }
+
+  const update = () => { sync(); render(); };
+
+  ['item', 'buy', 'qty', 'fees'].forEach(id => els[id].addEventListener('input', update));
+  els.sell.addEventListener('input', () => { if (!els.sell.readOnly) update(); });
+  els.pct.addEventListener('input',  () => { if (!els.pct.readOnly)  update(); });
+  els.perItem.addEventListener('change', render);
+
+  document.querySelectorAll('input[name="basis"]').forEach(r => r.addEventListener('change', update));
+  document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener('change', () => {
+    applyLocks();
+    update();
+  }));
+
+  applyLocks();
+  update();
+})();
+</script>
+</body>
+</html>
