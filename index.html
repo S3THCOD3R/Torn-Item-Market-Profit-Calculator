@@ -374,6 +374,78 @@
       font-size: 13px;
     }
 
+    /* ============ TOS TABLE ============ */
+    .tos-card {
+      background: #0f0d0d;
+      border: 1px solid rgba(192,57,43,.25);
+      border-radius: 4px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+
+    .tos-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--red-2);
+      margin-bottom: 10px;
+      text-shadow: 0 0 6px rgba(231,76,60,.5);
+    }
+
+    .tos-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .tos-table th,
+    .tos-table td {
+      padding: 6px 8px;
+      text-align: left;
+      vertical-align: top;
+      border: 1px solid var(--border);
+    }
+
+    .tos-table th {
+      background: rgba(192,57,43,.12);
+      color: #ffb8ad;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .tos-table td {
+      color: var(--muted);
+    }
+
+    .tos-table td:first-child {
+      color: var(--text);
+      font-weight: 600;
+      width: 26%;
+      white-space: nowrap;
+    }
+
+    .tos-note {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    .tos-note a {
+      color: var(--red-2);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(231,76,60,.35);
+    }
+
+    .tos-note a:hover {
+      color: #ff8f7c;
+      border-bottom-color: #ff8f7c;
+    }
+
     /* ============ API KEY FIELD ============ */
     .key-row {
       display: flex;
@@ -478,7 +550,6 @@
 
     .use-btn:hover .arrow { transform: translateX(2px); }
 
-    /* Highlight applied row briefly */
     .screener-table tbody tr.applied {
       background: rgba(46,204,113,.12);
       animation: appliedPulse 1.2s ease;
@@ -627,11 +698,14 @@
       .result-profit-value { font-size: 34px; }
       .pill { min-width: 0; flex: 1; font-size: 13px; padding: 9px 8px; }
 
-      /* Screener: hide the "#" column on mobile */
       .screener-table th:first-child,
       .screener-table td:first-child { display: none; }
 
       .use-btn { padding: 4px 7px; font-size: 11px; }
+
+      .tos-table th,
+      .tos-table td { padding: 5px 6px; font-size: 11px; }
+      .tos-table td:first-child { width: 30%; white-space: normal; }
     }
   </style>
 </head>
@@ -706,6 +780,45 @@
     <section class="card form-grid" id="screenerCard">
       <div class="card-label full">Live Market Screener</div>
 
+      <!-- ─── TOS TABLE (visible above the API key field) ─── -->
+      <div class="full tos-card" aria-label="Terms of Service summary">
+        <div class="tos-label">🛡️ API Terms of Service — How Your Data Is Handled</div>
+        <table class="tos-table">
+          <thead>
+            <tr>
+              <th scope="col">Category</th>
+              <th scope="col">Disclosure</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Data Storage</td>
+              <td>Only locally. Listings are rendered in your browser and not stored server-side. The item catalog is cached in your browser's localStorage for 1 hour to reduce API calls.</td>
+            </tr>
+            <tr>
+              <td>Data Sharing</td>
+              <td>Nobody. Your data is not shared with any third party.</td>
+            </tr>
+            <tr>
+              <td>Purpose of Use</td>
+              <td>Public community tool — item market profit calculation and price screening.</td>
+            </tr>
+            <tr>
+              <td>Key Storage &amp; Sharing</td>
+              <td>Stored only in your browser. Transmitted per-request through a stateless proxy; not stored, not logged, not shared.</td>
+            </tr>
+            <tr>
+              <td>Key Access Level</td>
+              <td>Public or Minimal. Specifically: <code>market → itemmarket</code> and <code>torn → items</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="tos-note">
+          <strong>Why a proxy?</strong> Browsers block direct cross-origin requests to <code>api.torn.com</code> due to CORS. The proxy is a stateless server-side relay that makes the request on your behalf and returns Torn's JSON response — it does not log, store, or retain your key.
+          Read the entire proxy source: <a href="https://github.com/S3THCOD3R/Torn-Item-Market-Profit-Calculator/blob/main/netlify/functions/torn-proxy.js" target="_blank" rel="noopener noreferrer">netlify/functions/torn-proxy.js</a> (~80 lines, MIT licensed).
+        </p>
+      </div>
+
       <div class="field full">
         <label for="apiKey">
           Torn API Key
@@ -725,7 +838,7 @@
           <button type="button" id="keyClear" class="key-clear" title="Clear saved key" aria-label="Clear saved API key">✕</button>
         </div>
         <div class="result-sub" style="margin-top:6px;">
-          Your key stays in this browser. It's forwarded to Torn via our proxy and never stored on the server. Use a <strong>Public</strong> or <strong>Minimal</strong> access key with <code>torn → items</code> permission for name lookup.
+          Your key is <strong>stored only in your browser</strong> and transmitted per-request through a stateless proxy that does not log or retain it. Use a <strong>Public</strong> or <strong>Minimal</strong> access key with <code>torn → items</code> permission for name lookup.
         </div>
       </div>
 
@@ -901,25 +1014,16 @@
   // USE THIS PRICE — populate calculator from a listing
   // ────────────────────────────────────────────────────────
   function applyListingToCalculator({ price, amount, itemName, rowEl }) {
-    // Fill item name (if we know it)
     if (itemName) els.item.value = itemName;
-
-    // Fill buy price with the listing's per-unit price
     els.buy.value = String(Math.round(price));
-
-    // Fill quantity with the listing's amount
     if (amount && amount > 0) els.qty.value = String(amount);
-
-    // Recompute + rerender calculator
     update();
 
-    // Mark the row as applied briefly
     if (rowEl) {
       rowEl.classList.add('applied');
       setTimeout(() => rowEl.classList.remove('applied'), 1300);
     }
 
-    // Scroll to the calculator form
     els.item.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setTimeout(() => els.buy.focus({ preventScroll: true }), 450);
   }
@@ -1192,7 +1296,6 @@
 
       els.screenerOut.innerHTML = html;
 
-      // Wire up the "→ Use" buttons
       els.screenerOut.querySelectorAll('.use-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const row = btn.closest('tr');
