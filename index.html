@@ -418,10 +418,12 @@
     .screener-table td {
       padding: 8px 6px;
       text-align: left;
+      vertical-align: middle;
     }
 
     .screener-table tbody tr {
       border-bottom: 1px solid var(--border);
+      transition: background .15s;
     }
 
     .screener-table tbody tr:hover {
@@ -431,6 +433,60 @@
     .screener-table td.price {
       font-weight: 700;
       color: #ff9a8a;
+    }
+
+    .screener-table td.use-cell {
+      width: 1%;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .use-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      background: var(--panel-2);
+      border: 1px solid var(--border-2);
+      border-radius: 3px;
+      color: var(--muted);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color .15s, color .15s, background .15s, box-shadow .15s;
+    }
+
+    .use-btn:hover {
+      border-color: var(--red-2);
+      color: #ff9a8a;
+      background: rgba(192,57,43,.15);
+      box-shadow: 0 0 12px rgba(192,57,43,.3);
+    }
+
+    .use-btn:focus-visible {
+      outline: 2px solid var(--red-2);
+      outline-offset: 1px;
+    }
+
+    .use-btn .arrow {
+      font-size: 14px;
+      transition: transform .15s;
+    }
+
+    .use-btn:hover .arrow { transform: translateX(2px); }
+
+    /* Highlight applied row briefly */
+    .screener-table tbody tr.applied {
+      background: rgba(46,204,113,.12);
+      animation: appliedPulse 1.2s ease;
+    }
+
+    @keyframes appliedPulse {
+      0%   { background: rgba(46,204,113,.3); }
+      100% { background: rgba(46,204,113,.06); }
     }
 
     /* ============ ITEM SUGGESTIONS ============ */
@@ -570,6 +626,12 @@
       .hero { padding: 32px 16px 60px; }
       .result-profit-value { font-size: 34px; }
       .pill { min-width: 0; flex: 1; font-size: 13px; padding: 9px 8px; }
+
+      /* Screener: hide the "#" column on mobile */
+      .screener-table th:first-child,
+      .screener-table td:first-child { display: none; }
+
+      .use-btn { padding: 4px 7px; font-size: 11px; }
     }
   </style>
 </head>
@@ -710,7 +772,8 @@
     sell: $('sell'), pct: $('pct'), perItem: $('perItem'),
     sellLock: $('sellLock'), pctLock: $('pctLock'), out: $('out'),
     apiKey: $('apiKey'), keyClear: $('keyClear'), keySaved: $('keySaved'),
-    itemId: $('itemId'), scanBtn: $('scanBtn'), screenerOut: $('screenerOut')
+    itemId: $('itemId'), scanBtn: $('scanBtn'), screenerOut: $('screenerOut'),
+    formCard: document.querySelector('section.card.form-grid')
   };
 
   const fmt    = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -767,350 +830,4 @@
     if (mode === 'pct' && basis === 'margin' && s.pct >= 95) {
       els.out.innerHTML = `<div class="unreachable">⚠ Target unreachable — a ${s.pct}% margin can't survive the 5% sales tax. Lower it below 95%.</div>`;
       return;
-    }
-
-    const gross     = s.sell * s.qty;
-    const tax       = els.perItem.checked ? Math.floor(s.sell * TAX) * s.qty : gross * TAX;
-    const net       = gross - tax;
-    const profit    = net - s.cost;
-    const ppi       = s.qty ? profit / s.qty : 0;
-    const roi       = s.cost > 0 ? (profit / s.cost) * 100 : 0;
-    const margin    = gross > 0 ? (profit / gross) * 100 : 0;
-    const breakEven = s.qty ? s.cost / (s.qty * (1 - TAX)) : 0;
-    const cls       = profit >= 0 ? 'profit' : 'loss';
-    const sign      = profit >= 0 ? '+' : '−';
-    const item      = esc(els.item.value.trim() || 'Item');
-
-    let tag, sub;
-    if (mode === 'pct') {
-      tag = `TARGET ${s.pct.toFixed(2)}% ${basis === 'markup' ? 'ROI' : 'MARGIN'}`;
-      sub = `Sell at ${money(s.sell)} each · Qty ${intFmt.format(s.qty)}`;
-    } else {
-      tag = `SELL ${money(s.sell)}`;
-      const p = pctFromSell(s.sell, basis, s.cost, s.qty);
-      sub = `${basis === 'markup' ? 'ROI on cost' : 'Margin on sale'}: ${p.toFixed(2)}% · Qty ${intFmt.format(s.qty)}`;
-    }
-
-    els.out.innerHTML = `
-      <div class="result-head">
-        <div class="result-top">
-          <span class="result-item">${item}</span>
-          <span class="result-tag">${tag}</span>
-        </div>
-        <div class="result-profit">
-          <span class="result-profit-value ${cls}">${sign}${money(Math.abs(profit))}</span>
-        </div>
-        <div class="result-sub">${sub}</div>
-      </div>
-      <div class="row"><span>Gross sale</span><strong>${money(gross)}</strong></div>
-      <div class="row"><span>Sales tax (5%)</span><strong class="neg">−${money(tax)}</strong></div>
-      <div class="row"><span>Net revenue</span><strong>${money(net)}</strong></div>
-      <div class="row"><span>Total cost</span><strong class="neg">−${money(s.cost)}</strong></div>
-      <div class="row divider"><span>Profit / item</span><strong class="${cls}">${money(ppi)}</strong></div>
-      <div class="row"><span>ROI on cost</span><strong class="${cls}">${roi.toFixed(2)}%</strong></div>
-      <div class="row"><span>Margin on sale</span><strong class="${cls}">${margin.toFixed(2)}%</strong></div>
-      <div class="row divider"><span>Break-even sell price</span><strong>${money(breakEven)}</strong></div>
-    `;
-  }
-
-  function applyLocks() {
-    const pctMode = radio('mode') === 'pct';
-    els.sell.readOnly    = pctMode;
-    els.pct.readOnly     = !pctMode;
-    els.sellLock.hidden  = !pctMode;
-    els.pctLock.hidden   = pctMode;
-  }
-
-  const update = () => { sync(); render(); };
-
-  ['item', 'buy', 'qty', 'fees'].forEach(id => els[id].addEventListener('input', update));
-  els.sell.addEventListener('input', () => { if (!els.sell.readOnly) update(); });
-  els.pct.addEventListener('input',  () => { if (!els.pct.readOnly)  update(); });
-  els.perItem.addEventListener('change', render);
-
-  document.querySelectorAll('input[name="basis"]').forEach(r => r.addEventListener('change', update));
-  document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener('change', () => {
-    applyLocks();
-    update();
-  }));
-
-  // ────────────────────────────────────────────────────────
-  // API KEY FIELD — masked with #, saved to localStorage
-  // ────────────────────────────────────────────────────────
-  const KEY_STORAGE = 'profitcalc4torn_api_key';
-  let realKey = '';
-  let displayLen = 0;
-
-  function renderMaskedKey() {
-    els.apiKey.value = '#'.repeat(realKey.length);
-    els.apiKey.setSelectionRange(realKey.length, realKey.length);
-    displayLen = realKey.length;
-    if (realKey) {
-      try { localStorage.setItem(KEY_STORAGE, realKey); } catch {}
-    } else {
-      try { localStorage.removeItem(KEY_STORAGE); } catch {}
-    }
-    els.keySaved.hidden = !realKey;
-  }
-
-  els.apiKey.addEventListener('input', () => {
-    const newLen = els.apiKey.value.length;
-    if (newLen > displayLen) {
-      const newChars = els.apiKey.value.slice(displayLen);
-      realKey += newChars;
-    } else if (newLen < displayLen) {
-      const removed = displayLen - newLen;
-      realKey = realKey.slice(0, realKey.length - removed);
-    }
-    renderMaskedKey();
-  });
-
-  els.apiKey.addEventListener('paste', (e) => {
-    e.preventDefault();
-    const pasted = (e.clipboardData || window.clipboardData).getData('text').trim();
-    if (pasted) {
-      realKey += pasted;
-      renderMaskedKey();
-    }
-  });
-
-  els.apiKey.addEventListener('click', () => {
-    els.apiKey.setSelectionRange(realKey.length, realKey.length);
-  });
-  els.apiKey.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'Home') {
-      setTimeout(() => els.apiKey.setSelectionRange(realKey.length, realKey.length), 0);
-    }
-  });
-
-  els.keyClear.addEventListener('click', () => {
-    realKey = '';
-    renderMaskedKey();
-    els.apiKey.focus();
-  });
-
-  try {
-    const saved = localStorage.getItem(KEY_STORAGE);
-    if (saved) {
-      realKey = saved;
-      renderMaskedKey();
-    }
-  } catch {}
-
-  // ────────────────────────────────────────────────────────
-  // ITEM CATALOG — fetch once, cache in localStorage
-  // ────────────────────────────────────────────────────────
-  const CATALOG_STORAGE = 'profitcalc4torn_item_catalog';
-  let catalogCache = null;
-  let catalogKey = null;
-
-  async function getItemCatalog(key) {
-    if (catalogCache && catalogKey === key) return catalogCache;
-
-    try {
-      const stored = localStorage.getItem(CATALOG_STORAGE);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.key === key && parsed.expires > Date.now()) {
-          catalogCache = parsed.items;
-          catalogKey = key;
-          return catalogCache;
-        }
-      }
-    } catch {}
-
-    const res = await fetch('/api/items', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'items', key }),
-    });
-
-    // Guard against HTML responses (redirect / catch-all fallback)
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-      throw new Error(`Item catalog endpoint returned ${res.status} — not JSON. Check that /api/items proxy is deployed.`);
-    }
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Failed to load item catalog');
-    }
-
-    const items = data.items || [];
-    catalogCache = items;
-    catalogKey = key;
-
-    try {
-      localStorage.setItem(CATALOG_STORAGE, JSON.stringify({
-        key,
-        expires: Date.now() + 60 * 60 * 1000, // 1 hour
-        items,
-      }));
-    } catch {}
-
-    return items;
-  }
-
-  function resolveItem(input, catalog) {
-    const lower = input.toLowerCase();
-
-    const exact = catalog.find(it => (it.name || '').toLowerCase() === lower);
-    if (exact) return { id: String(exact.id), name: exact.name };
-
-    const partial = catalog.filter(it => (it.name || '').toLowerCase().includes(lower));
-    if (partial.length === 1) {
-      return { id: String(partial[0].id), name: partial[0].name };
-    }
-    if (partial.length > 1) {
-      return { multiple: partial.slice(0, 12).map(it => ({ id: it.id, name: it.name })) };
-    }
-
-    return { notFound: true };
-  }
-
-  // ────────────────────────────────────────────────────────
-  // LIVE MARKET SCREENER
-  // ────────────────────────────────────────────────────────
-  els.scanBtn.addEventListener('click', async () => {
-    const rawInput = els.itemId.value.trim();
-
-    if (!realKey) {
-      els.screenerOut.innerHTML = `<div class="unreachable">Enter your Torn API key above first.</div>`;
-      return;
-    }
-    if (!rawInput) {
-      els.screenerOut.innerHTML = `<div class="unreachable">Enter an item ID or name.</div>`;
-      return;
-    }
-
-    els.scanBtn.disabled = true;
-    els.screenerOut.innerHTML = '<div class="result-sub">Resolving item…</div>';
-
-    let itemId;
-
-    // Numeric input → use as ID directly (no catalog needed)
-    if (/^\d+$/.test(rawInput)) {
-      itemId = rawInput;
-    } else {
-      // Text input → resolve via catalog
-      try {
-        const catalog = await getItemCatalog(realKey);
-        const result = resolveItem(rawInput, catalog);
-
-        if (result.notFound) {
-          els.screenerOut.innerHTML = `<div class="unreachable">Item "${esc(rawInput)}" not found. Try a different name or use the item ID.</div>`;
-          els.scanBtn.disabled = false;
-          return;
-        }
-
-        if (result.multiple) {
-          let html = `<div class="result-sub" style="margin-bottom:8px;">Multiple matches for "${esc(rawInput)}" — pick one:</div><div class="suggestions">`;
-          result.multiple.forEach(it => {
-            html += `<button type="button" class="suggestion" data-id="${esc(String(it.id))}" data-name="${esc(it.name)}">${esc(it.name)} <small>#${esc(String(it.id))}</small></button>`;
-          });
-          html += '</div>';
-          els.screenerOut.innerHTML = html;
-
-          els.screenerOut.querySelectorAll('.suggestion').forEach(btn => {
-            btn.addEventListener('click', () => {
-              els.itemId.value = btn.dataset.id;
-              els.scanBtn.click();
-            });
-          });
-
-          els.scanBtn.disabled = false;
-          return;
-        }
-
-        itemId = result.id;
-      } catch (err) {
-        // Catalog unavailable — offer graceful fallback
-        els.screenerOut.innerHTML = `
-          <div class="unreachable">
-            Item catalog unavailable (${esc(err.message)}).<br>
-            Try entering the item <strong>ID</strong> directly instead (e.g. <code>206</code> for Xanax).
-          </div>
-        `;
-        els.scanBtn.disabled = false;
-        return;
-      }
-    }
-
-    els.screenerOut.innerHTML = '<div class="result-sub">Scanning market…</div>';
-
-    try {
-      const res = await fetch('/api/market', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itemId, key: realKey }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        els.screenerOut.innerHTML = `<div class="unreachable">Error: ${esc(data.error || 'Unknown error')}</div>`;
-        return;
-      }
-
-      const market    = data.itemmarket || {};
-      const itemMeta  = market.item || {};
-      const listings  = market.listings || [];
-      const total     = data._metadata?.total ?? listings.length;
-
-      if (!listings.length) {
-        els.screenerOut.innerHTML = '<div class="result-sub">No listings found for this item.</div>';
-        return;
-      }
-
-      const avgPrice = itemMeta.average_price || 0;
-      let html = `
-        <div class="result-head" style="padding-bottom:12px;">
-          <div class="result-top">
-            <span class="result-item">${esc(itemMeta.name || 'Item')} <span class="result-sub">(ID ${esc(String(itemMeta.id || itemId))})</span></span>
-            <span class="result-tag">${intFmt.format(total)} LISTINGS</span>
-          </div>
-          <div class="result-sub">Average price: <strong style="color:var(--text);">${money(avgPrice)}</strong> · Cheapest first</div>
-        </div>
-      `;
-
-      html += `<table class="screener-table">
-        <thead><tr>
-          <th>#</th><th>Price / unit</th><th>Qty</th><th>Total</th>
-        </tr></thead><tbody>`;
-
-      listings.forEach((l, i) => {
-        const unit  = l.price  || 0;
-        const qty   = l.amount || 0;
-        const lineTotal = unit * qty;
-        html += `<tr>
-          <td>${i + 1}</td>
-          <td class="price">${money(unit)}</td>
-          <td>${intFmt.format(qty)}</td>
-          <td>${money(lineTotal)}</td>
-        </tr>`;
-      });
-
-      html += '</tbody></table>';
-
-      if (total > listings.length) {
-        html += `<div class="result-sub" style="margin-top:10px;">
-          Showing ${listings.length} of ${intFmt.format(total)} listings.
-        </div>`;
-      }
-
-      els.screenerOut.innerHTML = html;
-    } catch (err) {
-      els.screenerOut.innerHTML = '<div class="unreachable">Network error — is the proxy function deployed?</div>';
-    } finally {
-      els.scanBtn.disabled = false;
-    }
-  });
-
-  // ────────────────────────────────────────────────────────
-  // INIT
-  // ────────────────────────────────────────────────────────
-  applyLocks();
-  update();
-})();
-</script>
-</body>
-</html>
+   
