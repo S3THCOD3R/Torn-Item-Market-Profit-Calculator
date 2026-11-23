@@ -26,8 +26,9 @@ Enter a sell price to expose your real profit, ROI, and margin — or feed it a 
 - **📦 BULK-AWARE** — quantity and extra fees fold into total cost
 - **📡 LIVE MARKET SCREENER** — scan real listings by **item ID or item name**, sorted cheapest-first
 - **🔑 PER-USER API KEY** — paste your own Torn key; masked as `########`, saved to *your* browser only
-- **🛰️ SECURE PROXY** — key is forwarded server-side to Torn and never stored on the server
+- **🛰️ STATELESS PROXY** — key is forwarded per-request server-side to Torn; **not stored, not logged, not shared**
 - **🧠 ITEM NAME LOOKUP** — type `Xanax` instead of remembering `206`; catalog cached 1 hour
+- **⚡ USE THIS PRICE** — click any listing to load its price and quantity straight into the calculator
 - **🌑 TORN-UI** — blood-red glow, torn-paper hero, dark as the pit
 - **📴 ZERO DEPENDENCIES** — one HTML file, vanilla JS, runs offline for the calculator
 
@@ -51,25 +52,24 @@ Scroll to the **Live Market Screener** card below the calculator. Paste your Tor
 
 ### 🔑 What key do I need?
 
-Any key with **`Public`** or **`Minimal`** access. For **item name lookup** (e.g. typing `Xanax` instead of `206`), the key needs the **`torn → items`** permission — both Public and Minimal include this by default.
+Any key with **`Public`** or **`Minimal`** access. For **item name lookup** (typing `Xanax` instead of `206`), the key needs **`torn → items`** permission — both Public and Minimal include this by default.
 
 Generate one at **Torn → Preferences → API**:
-`https://www.torn.com/preferences.php#tab=api`
+`https://www.torn.com/preferences#tab=api`
 
 **Numeric IDs always work** — even if your key lacks `torn → items`, you can still scan by typing the ID (e.g. `206`).
 
-### 🛡️ How your key is handled
+### 🛡️ API Terms of Service — How Your Data Is Handled
 
-| Layer | What happens |
+| Category | Disclosure |
 |---|---|
-| **Browser UI** | Key displays as `########` — one `#` per character, no cursor-in-middle editing |
-| **Storage** | Saved in **your browser's `localStorage`** only; never leaves the device unmasked |
-| **Transport** | POSTed to `/api/market` (or `/api/items`) in the JSON body — never in the URL, never in server logs |
-| **Proxy** | Netlify Function forwards the key to Torn and **discards it immediately** — nothing is stored server-side |
-| **Cache** | Item catalog cached in `localStorage` for **1 hour**, keyed by your API key hash |
-| **Clear button** | The `✕` next to the field wipes both the field and `localStorage` instantly |
+| **Data Storage** | Only locally. Listings are rendered in your browser and not stored server-side. The item catalog is cached in your browser's `localStorage` for 1 hour to reduce API calls. |
+| **Data Sharing** | Nobody. Your data is not shared with any third party. |
+| **Purpose of Use** | Public community tool — item market profit calculation and price screening. |
+| **Key Storage & Sharing** | Stored only in your browser. Transmitted per-request through a stateless proxy; not stored, not logged, not shared. |
+| **Key Access Level** | Public or Minimal. Specifically: `market → itemmarket` and `torn → items`. |
 
-There is **no shared key, no server-side storage, no tracking**. Every user brings their own key, and it stays in their browser.
+**Why a proxy?** Browsers block direct cross-origin requests to `api.torn.com` due to CORS. The proxy is a stateless server-side relay that makes the request on your behalf and returns Torn's JSON response — it does not log, store, or retain your key. Read the entire proxy source: [`netlify/functions/torn-proxy.js`](netlify/functions/torn-proxy.js) (~80 lines, MIT licensed).
 
 ### 🔍 How item name lookup works
 
@@ -107,9 +107,9 @@ Try typing `Xan` — you'll get clickable suggestion chips for every item contai
 ├───┬────────────────┬──────────┬──────────────────────┤
 │ # │ Price / unit   │ Qty      │ Total                │
 ├───┼────────────────┼──────────┼──────────────────────┤
-│ 1 │ $849,999.00    │ 9        │ $7,649,991.00        │
-│ 2 │ $850,000.00    │ 20       │ $17,000,000.00       │
-│ 3 │ $856,000.00    │ 12       │ $10,272,000.00       │
+│ 1 │ $849,999.00    │ 9        │ $7,649,991.00  → Use │
+│ 2 │ $850,000.00    │ 20       │ $17,000,000.00 → Use │
+│ 3 │ $856,000.00    │ 12       │ $10,272,000.00 → Use │
 │ … │                │          │                      │
 └───┴────────────────┴──────────┴──────────────────────┘
 Showing 20 of 207 listings.
@@ -118,7 +118,8 @@ Showing 20 of 207 listings.
 - **Item name + ID** and **total listing count** in the header
 - **Average price** — Torn's computed market average
 - **Cheapest first** — Torn returns listings sorted by price ascending
-- **Total** — `price × amount` per row, so you can see the cost of buying the whole stack
+- **Total** — `price × amount` per row
+- **→ Use** — click any row to load its price and quantity into the calculator above, then adjust your sell price to see real profit instantly
 
 ### 🧪 Quick test IDs
 
@@ -147,7 +148,7 @@ open index.html          # macOS
 
 ### Deploying the proxy yourself
 
-The screener relies on Netlify Functions to bypass browser CORS restrictions and keep your API key out of URLs. The two routes are wired in `netlify.toml`:
+The screener relies on Netlify Functions to bypass browser CORS restrictions. The two routes are wired in `netlify.toml`:
 
 ```toml
 [[redirects]]
@@ -226,7 +227,7 @@ Any lower → you miss the target. Any higher → you're bleeding margin.
 - **HTML5** — semantic skeleton
 - **CSS3** — custom properties, grid, `:has()`, `clip-path`
 - **Vanilla JavaScript** — no framework, no bundler, no build
-- **Netlify Functions** — serverless proxy for Torn API v2 (`/api/market` + `/api/items`)
+- **Netlify Functions** — stateless serverless proxy for Torn API v2 (`/api/market` + `/api/items`)
 - **Torn API v2** — `market/{id}/itemmarket` and `torn/items`
 - **Google Fonts** — *Staatliches* + *Barlow Condensed*
 - **Hosted on Netlify** — static deploy + functions, auto-redeploy on `git push`
@@ -244,7 +245,7 @@ Any lower → you miss the target. Any higher → you're bleeding margin.
 ├── netlify/
 │   └── functions/
 │       ├── package.json          # { "type": "module" }
-│       └── torn-proxy.js         # proxy for /api/market + /api/items
+│       └── torn-proxy.js         # stateless proxy for /api/market + /api/items
 ├── README.md                     # this briefing
 ├── Guide.md                      # field manual (features, math, examples, screener)
 ├── CONTRIBUTING.md               # enlistment protocol
@@ -282,6 +283,8 @@ That lets us verify against the formulas in the [**Field Manual**](Guide.md) §8
 - `Item catalog unavailable` → check **Netlify → Functions** shows `torn-proxy` deployed
 - `No listings found` → try a different item ID (see the quick test IDs above)
 - `Incorrect key` / `Access level` → regenerate with **Public** or **Minimal** access at Torn → Preferences → API
+
+**Privacy questions:** the proxy source is public — [`netlify/functions/torn-proxy.js`](netlify/functions/torn-proxy.js). It reads the key from the request body, forwards it to Torn, returns the response, and discards it. No logging, no database, no retention.
 
 ---
 
