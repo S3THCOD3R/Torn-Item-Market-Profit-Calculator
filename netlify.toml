@@ -10,7 +10,7 @@
   node_bundler = "esbuild"
 
 # ─────────────────────────────────────────────────────────────
-# API PROXY REDIRECTS — both point to torn-proxy
+# API PROXY REDIRECTS — all point to torn-proxy
 # ⚠️ ORDER MATTERS — API rules MUST come before the catch-all.
 # ─────────────────────────────────────────────────────────────
 [[redirects]]
@@ -21,6 +21,12 @@
 
 [[redirects]]
   from = "/api/items"
+  to = "/.netlify/functions/torn-proxy"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/bazaar"
   to = "/.netlify/functions/torn-proxy"
   status = 200
   force = true
