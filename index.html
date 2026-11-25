@@ -19,6 +19,24 @@
       --red: #c0392b;
       --red-2: #e74c3c;
       --green: #2ecc71;
+      --chart-line: #e74c3c;
+      --chart-fill: rgba(231,76,60,.12);
+    }
+
+    /* ── LIGHT THEME ── */
+    body.light {
+      --bg: #f2f0ec;
+      --panel: #ffffff;
+      --panel-2: #f6f4f1;
+      --border: #ddd8d2;
+      --border-2: #c5bfb8;
+      --text: #1f1c1a;
+      --muted: #7a746e;
+      --red: #b52e21;
+      --red-2: #c0392b;
+      --green: #1e8449;
+      --chart-line: #c0392b;
+      --chart-fill: rgba(192,57,43,.1);
     }
 
     * { box-sizing: border-box; }
@@ -32,6 +50,7 @@
       line-height: 1.5;
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
+      transition: background .25s, color .25s;
     }
 
     body::before {
@@ -130,6 +149,40 @@
       outline: none;
     }
 
+    /* ============ THEME TOGGLE ============ */
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 5;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: rgba(0,0,0,.35);
+      border: 1px solid rgba(231,76,60,.4);
+      border-radius: 4px;
+      color: #ff9a8a;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color .15s, color .15s, background .15s, box-shadow .15s;
+    }
+
+    .theme-toggle:hover,
+    .theme-toggle:focus-visible {
+      border-color: #e74c3c;
+      color: #ffd0c8;
+      background: rgba(192,57,43,.25);
+      box-shadow: 0 0 14px rgba(192,57,43,.4);
+      outline: none;
+    }
+
+    .theme-toggle svg { width: 14px; height: 14px; }
+
     /* ============ LAYOUT ============ */
     main {
       max-width: 720px;
@@ -146,6 +199,11 @@
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.03),
         0 2px 12px rgba(0,0,0,.3);
+      transition: background .25s, border-color .25s;
+    }
+
+    body.light .card {
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
     }
 
     .card-label {
@@ -248,14 +306,14 @@
     .field input {
       width: 100%;
       padding: 10px 12px;
-      background: #0d0d0d;
+      background: var(--bg);
       border: 1px solid var(--border-2);
       border-radius: 4px;
       color: var(--text);
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 16px;
       font-weight: 500;
-      transition: border-color .15s, box-shadow .15s;
+      transition: border-color .15s, box-shadow .15s, background .25s;
     }
 
     .field input:hover { border-color: #4a4a4a; }
@@ -267,13 +325,13 @@
     }
 
     .field input[readonly] {
-      background: #0a0808;
-      border: 1px dashed #3d2220;
-      color: #ff9a8a;
+      background: var(--panel-2);
+      border: 1px dashed var(--border-2);
+      color: var(--red-2);
       cursor: default;
     }
 
-    .field input[readonly]:focus { box-shadow: none; border-color: #3d2220; }
+    .field input[readonly]:focus { box-shadow: none; border-color: var(--border-2); }
 
     .check {
       display: flex;
@@ -339,7 +397,7 @@
       align-items: baseline;
       padding: 6px 0;
       font-size: 14px;
-      border-bottom: 1px solid rgba(255,255,255,.03);
+      border-bottom: 1px solid rgba(127,127,127,.1);
     }
 
     .row:last-child { border-bottom: none; }
@@ -347,7 +405,7 @@
     .row strong { font-weight: 600; color: var(--text); }
     .row strong.profit { color: var(--green); }
     .row strong.loss   { color: var(--red-2); }
-    .row strong.neg    { color: #e88; }
+    .row strong.neg    { color: var(--red-2); }
 
     .row.divider {
       margin-top: 6px;
@@ -361,22 +419,23 @@
       border: 1px solid rgba(231,76,60,.4);
       background: rgba(192,57,43,.1);
       border-radius: 4px;
-      color: #ffb8ad;
+      color: var(--red-2);
       font-size: 14px;
     }
 
+    body.light .unreachable { color: #7a1a10; }
+
     .unreachable code {
-      background: rgba(255,255,255,.06);
+      background: rgba(127,127,127,.12);
       padding: 1px 6px;
       border-radius: 3px;
-      color: #ffd0c8;
       font-family: 'Courier New', monospace;
       font-size: 13px;
     }
 
     /* ============ TOS TABLE ============ */
     .tos-card {
-      background: #0f0d0d;
+      background: var(--panel-2);
       border: 1px solid rgba(192,57,43,.25);
       border-radius: 4px;
       padding: 14px 16px;
@@ -390,7 +449,6 @@
       text-transform: uppercase;
       color: var(--red-2);
       margin-bottom: 10px;
-      text-shadow: 0 0 6px rgba(231,76,60,.5);
     }
 
     .tos-table {
@@ -410,16 +468,14 @@
 
     .tos-table th {
       background: rgba(192,57,43,.12);
-      color: #ffb8ad;
+      color: var(--red-2);
       font-size: 10px;
       font-weight: 700;
       letter-spacing: .1em;
       text-transform: uppercase;
     }
 
-    .tos-table td {
-      color: var(--muted);
-    }
+    .tos-table td { color: var(--muted); }
 
     .tos-table td:first-child {
       color: var(--text);
@@ -447,10 +503,7 @@
     }
 
     /* ============ API KEY FIELD ============ */
-    .key-row {
-      display: flex;
-      gap: 8px;
-    }
+    .key-row { display: flex; gap: 8px; }
 
     .key-row input {
       flex: 1;
@@ -498,13 +551,11 @@
       transition: background .15s;
     }
 
-    .screener-table tbody tr:hover {
-      background: rgba(192,57,43,.06);
-    }
+    .screener-table tbody tr:hover { background: rgba(192,57,43,.06); }
 
     .screener-table td.price {
       font-weight: 700;
-      color: #ff9a8a;
+      color: var(--red-2);
     }
 
     .screener-table td.use-cell {
@@ -533,21 +584,13 @@
 
     .use-btn:hover {
       border-color: var(--red-2);
-      color: #ff9a8a;
+      color: var(--red-2);
       background: rgba(192,57,43,.15);
       box-shadow: 0 0 12px rgba(192,57,43,.3);
     }
 
-    .use-btn:focus-visible {
-      outline: 2px solid var(--red-2);
-      outline-offset: 1px;
-    }
-
-    .use-btn .arrow {
-      font-size: 14px;
-      transition: transform .15s;
-    }
-
+    .use-btn:focus-visible { outline: 2px solid var(--red-2); outline-offset: 1px; }
+    .use-btn .arrow { font-size: 14px; transition: transform .15s; }
     .use-btn:hover .arrow { transform: translateX(2px); }
 
     .screener-table tbody tr.applied {
@@ -560,7 +603,123 @@
       100% { background: rgba(46,204,113,.06); }
     }
 
-    /* ============ ITEM SUGGESTIONS ============ */
+    /* ============ BAZAAR PANEL ============ */
+    .bazaar-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--red-2);
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .bazaar-panel .bp-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    .bazaar-panel .bp-price {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--red-2);
+      font-family: 'Staatliches', sans-serif;
+      letter-spacing: .02em;
+    }
+
+    .bazaar-panel .bp-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .bazaar-panel .bp-compare {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .05em;
+    }
+
+    .bazaar-panel .bp-compare.better { color: var(--green); }
+    .bazaar-panel .bp-compare.worse  { color: var(--red-2); }
+
+    /* ============ SPARKLINE ============ */
+    .sparkline-wrap {
+      margin-top: 14px;
+      padding: 10px 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+
+    .sparkline-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+
+    .sparkline-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .sparkline-meta {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .sparkline {
+      display: block;
+      width: 100%;
+      height: 56px;
+    }
+
+    /* ============ PAGINATION ============ */
+    .load-more-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .load-more-btn {
+      padding: 8px 22px;
+      background: var(--panel-2);
+      border: 1px solid var(--border-2);
+      border-radius: 4px;
+      color: var(--muted);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color .15s, color .15s, background .15s, box-shadow .15s;
+    }
+
+    .load-more-btn:hover:not(:disabled),
+    .load-more-btn:focus-visible:not(:disabled) {
+      border-color: var(--red-2);
+      color: var(--red-2);
+      background: rgba(192,57,43,.12);
+      box-shadow: 0 0 12px rgba(192,57,43,.3);
+      outline: none;
+    }
+
+    .load-more-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ============ SUGGESTIONS ============ */
     .suggestions {
       display: flex;
       flex-wrap: wrap;
@@ -582,15 +741,11 @@
 
     .suggestion:hover {
       border-color: var(--red-2);
-      color: #ff9a8a;
+      color: var(--red-2);
       background: rgba(192,57,43,.12);
     }
 
-    .suggestion small {
-      color: var(--muted);
-      font-weight: 400;
-      margin-left: 4px;
-    }
+    .suggestion small { color: var(--muted); font-weight: 400; margin-left: 4px; }
 
     /* ============ FOOTER ============ */
     .footer {
@@ -608,7 +763,7 @@
       font-size: 11px;
       letter-spacing: .2em;
       text-transform: uppercase;
-      color: #5a5a5a;
+      color: var(--muted);
     }
 
     .footer-links {
@@ -626,16 +781,14 @@
       font-weight: 600;
       letter-spacing: .15em;
       text-transform: uppercase;
-      color: #7a6a6a;
+      color: var(--muted);
       text-decoration: none;
       padding: 4px 0;
       border-bottom: 1px dashed transparent;
       transition: color .15s, border-color .15s, text-shadow .15s;
     }
 
-    .footer-links a svg {
-      transition: transform .15s, color .15s;
-    }
+    .footer-links a svg { transition: transform .15s, color .15s; }
 
     .footer-links a:hover,
     .footer-links a:focus-visible {
@@ -685,16 +838,13 @@
       outline: none;
     }
 
-    .footer-donate svg {
-      flex-shrink: 0;
-      transition: transform .15s;
-    }
-
+    .footer-donate svg { flex-shrink: 0; transition: transform .15s; }
     .footer-donate:hover svg { transform: scale(1.15); }
 
     @media (max-width: 540px) {
       .form-grid { grid-template-columns: 1fr; }
-      .hero { padding: 32px 16px 60px; }
+      .hero { padding: 40px 16px 60px; }
+      .theme-toggle { top: 12px; right: 12px; font-size: 11px; padding: 6px 10px; }
       .result-profit-value { font-size: 34px; }
       .pill { min-width: 0; flex: 1; font-size: 13px; padding: 9px 8px; }
 
@@ -711,6 +861,12 @@
 </head>
 <body>
   <header class="hero">
+    <button type="button" id="themeToggle" class="theme-toggle" aria-label="Toggle light/dark theme">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path id="themePath" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+      </svg>
+      <span id="themeLabel">Light</span>
+    </button>
     <div class="hero-inner">
       <h1 class="brand">TORN</h1>
       <p class="brand-sub">
@@ -780,7 +936,7 @@
     <section class="card form-grid" id="screenerCard">
       <div class="card-label full">Live Market Screener</div>
 
-      <!-- ─── TOS TABLE (visible above the API key field) ─── -->
+      <!-- ─── TOS TABLE ─── -->
       <div class="full tos-card" aria-label="Terms of Service summary">
         <div class="tos-label">🛡️ API Terms of Service — How Your Data Is Handled</div>
         <table class="tos-table">
@@ -809,13 +965,13 @@
             </tr>
             <tr>
               <td>Key Access Level</td>
-              <td>Public or Minimal. Specifically: <code>market → itemmarket</code> and <code>torn → items</code>.</td>
+              <td>Public or Minimal. Specifically: <code>market → itemmarket</code>, <code>market → bazaar</code>, and <code>torn → items</code>.</td>
             </tr>
           </tbody>
         </table>
         <p class="tos-note">
           <strong>Why a proxy?</strong> Browsers block direct cross-origin requests to <code>api.torn.com</code> due to CORS. The proxy is a stateless server-side relay that makes the request on your behalf and returns Torn's JSON response — it does not log, store, or retain your key.
-          Read the entire proxy source: <a href="https://github.com/S3THCOD3R/Torn-Item-Market-Profit-Calculator/blob/main/netlify/functions/torn-proxy.js" target="_blank" rel="noopener noreferrer">netlify/functions/torn-proxy.js</a> (~80 lines, MIT licensed).
+          Read the entire proxy source: <a href="https://github.com/S3THCOD3R/Torn-Item-Market-Profit-Calculator/blob/main/netlify/functions/torn-proxy.js" target="_blank" rel="noopener noreferrer">netlify/functions/torn-proxy.js</a> (~110 lines, MIT licensed).
         </p>
       </div>
 
@@ -886,7 +1042,8 @@
     sellLock: $('sellLock'), pctLock: $('pctLock'), out: $('out'),
     apiKey: $('apiKey'), keyClear: $('keyClear'), keySaved: $('keySaved'),
     itemId: $('itemId'), scanBtn: $('scanBtn'), screenerOut: $('screenerOut'),
-    formCard: document.querySelector('section.card.form-grid')
+    themeToggle: $('themeToggle'), themeLabel: $('themeLabel'),
+    themeIcon: $('themeIcon')
   };
 
   const fmt    = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -894,6 +1051,31 @@
   const money  = n => '$' + fmt.format(n);
   const esc    = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const radio  = name => document.querySelector(`input[name="${name}"]:checked`).value;
+
+  // ────────────────────────────────────────────────────────
+  // THEME (dark default, persisted)
+  // ────────────────────────────────────────────────────────
+  const THEME_KEY = 'profitcalc4torn_theme';
+  const ICON_MOON = 'M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z';
+  const ICON_SUN  = 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.36-6.36l-.71.71M6.34 17.66l-.71.71m12.73 0l-.71-.71M6.34 6.34l-.71-.71M12 7a5 5 0 100 10 5 5 0 000-10z';
+
+  function applyTheme(theme) {
+    const light = theme === 'light';
+    document.body.classList.toggle('light', light);
+    els.themeLabel.textContent = light ? 'Dark' : 'Light';
+    $('themePath').setAttribute('d', light ? ICON_SUN : ICON_MOON);
+    try { localStorage.setItem(THEME_KEY, theme); } catch {}
+  }
+
+  els.themeToggle.addEventListener('click', () => {
+    const light = document.body.classList.contains('light');
+    applyTheme(light ? 'dark' : 'light');
+  });
+
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light') applyTheme('light');
+  } catch {}
 
   // ────────────────────────────────────────────────────────
   // CALCULATOR
@@ -1011,7 +1193,7 @@
   }));
 
   // ────────────────────────────────────────────────────────
-  // USE THIS PRICE — populate calculator from a listing
+  // USE THIS PRICE
   // ────────────────────────────────────────────────────────
   function applyListingToCalculator({ price, amount, itemName, rowEl }) {
     if (itemName) els.item.value = itemName;
@@ -1029,7 +1211,7 @@
   }
 
   // ────────────────────────────────────────────────────────
-  // API KEY FIELD — masked with #, saved to localStorage
+  // API KEY
   // ────────────────────────────────────────────────────────
   const KEY_STORAGE = 'profitcalc4torn_api_key';
   let realKey = '';
@@ -1050,11 +1232,9 @@
   els.apiKey.addEventListener('input', () => {
     const newLen = els.apiKey.value.length;
     if (newLen > displayLen) {
-      const newChars = els.apiKey.value.slice(displayLen);
-      realKey += newChars;
+      realKey += els.apiKey.value.slice(displayLen);
     } else if (newLen < displayLen) {
-      const removed = displayLen - newLen;
-      realKey = realKey.slice(0, realKey.length - removed);
+      realKey = realKey.slice(0, realKey.length - (displayLen - newLen));
     }
     renderMaskedKey();
   });
@@ -1062,19 +1242,11 @@
   els.apiKey.addEventListener('paste', (e) => {
     e.preventDefault();
     const pasted = (e.clipboardData || window.clipboardData).getData('text').trim();
-    if (pasted) {
-      realKey += pasted;
-      renderMaskedKey();
-    }
+    if (pasted) { realKey += pasted; renderMaskedKey(); }
   });
 
   els.apiKey.addEventListener('click', () => {
     els.apiKey.setSelectionRange(realKey.length, realKey.length);
-  });
-  els.apiKey.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'Home') {
-      setTimeout(() => els.apiKey.setSelectionRange(realKey.length, realKey.length), 0);
-    }
   });
 
   els.keyClear.addEventListener('click', () => {
@@ -1085,14 +1257,11 @@
 
   try {
     const saved = localStorage.getItem(KEY_STORAGE);
-    if (saved) {
-      realKey = saved;
-      renderMaskedKey();
-    }
+    if (saved) { realKey = saved; renderMaskedKey(); }
   } catch {}
 
   // ────────────────────────────────────────────────────────
-  // ITEM CATALOG — fetch once, cache in localStorage
+  // ITEM CATALOG
   // ────────────────────────────────────────────────────────
   const CATALOG_STORAGE = 'profitcalc4torn_item_catalog';
   let catalogCache = null;
@@ -1121,13 +1290,11 @@
 
     const contentType = res.headers.get('content-type') || '';
     if (!contentType.includes('application/json')) {
-      throw new Error(`Item catalog endpoint returned ${res.status} — not JSON. Check that /api/items proxy is deployed.`);
+      throw new Error(`Item catalog endpoint returned ${res.status} — not JSON.`);
     }
 
     const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Failed to load item catalog');
-    }
+    if (!res.ok) throw new Error(data.error || 'Failed to load item catalog');
 
     const items = data.items || [];
     catalogCache = items;
@@ -1135,9 +1302,7 @@
 
     try {
       localStorage.setItem(CATALOG_STORAGE, JSON.stringify({
-        key,
-        expires: Date.now() + 60 * 60 * 1000,
-        items,
+        key, expires: Date.now() + 60 * 60 * 1000, items,
       }));
     } catch {}
 
@@ -1146,23 +1311,248 @@
 
   function resolveItem(input, catalog) {
     const lower = input.toLowerCase();
-
     const exact = catalog.find(it => (it.name || '').toLowerCase() === lower);
     if (exact) return { id: String(exact.id), name: exact.name };
 
     const partial = catalog.filter(it => (it.name || '').toLowerCase().includes(lower));
-    if (partial.length === 1) {
-      return { id: String(partial[0].id), name: partial[0].name };
-    }
-    if (partial.length > 1) {
-      return { multiple: partial.slice(0, 12).map(it => ({ id: it.id, name: it.name })) };
-    }
-
+    if (partial.length === 1) return { id: String(partial[0].id), name: partial[0].name };
+    if (partial.length > 1) return { multiple: partial.slice(0, 12).map(it => ({ id: it.id, name: it.name })) };
     return { notFound: true };
   }
 
   // ────────────────────────────────────────────────────────
-  // LIVE MARKET SCREENER
+  // PRICE HISTORY SPARKLINE (per item, per browser)
+  // ────────────────────────────────────────────────────────
+  const HISTORY_STORAGE = 'profitcalc4torn_price_history';
+  const HISTORY_MAX = 20;
+
+  function getHistory(itemId) {
+    try {
+      const raw = localStorage.getItem(HISTORY_STORAGE);
+      if (!raw) return [];
+      const all = JSON.parse(raw);
+      return Array.isArray(all[itemId]) ? all[itemId] : [];
+    } catch { return []; }
+  }
+
+  function pushHistory(itemId, price) {
+    if (!price || price <= 0) return getHistory(itemId);
+    try {
+      const raw = localStorage.getItem(HISTORY_STORAGE);
+      const all = raw ? JSON.parse(raw) : {};
+      const arr = Array.isArray(all[itemId]) ? all[itemId] : [];
+      arr.push({ t: Date.now(), p: Math.round(price) });
+      if (arr.length > HISTORY_MAX) arr.splice(0, arr.length - HISTORY_MAX);
+      all[itemId] = arr;
+      localStorage.setItem(HISTORY_STORAGE, JSON.stringify(all));
+      return arr;
+    } catch { return []; }
+  }
+
+  function renderSparkline(points) {
+    if (!points || points.length < 2) return '';
+
+    const W = 600, H = 56, PAD = 4;
+    const prices = points.map(p => p.p);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    const range = max - min || 1;
+    const stepX = (W - PAD * 2) / (points.length - 1);
+
+    const coords = points.map((pt, i) => {
+      const x = PAD + i * stepX;
+      const y = PAD + (H - PAD * 2) * (1 - (pt.p - min) / range);
+      return [x, y];
+    });
+
+    const line = coords.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+    const area = `${line} L${(W - PAD).toFixed(1)},${(H - PAD).toFixed(1)} L${PAD.toFixed(1)},${(H - PAD).toFixed(1)} Z`;
+
+    const first = points[0].p;
+    const last  = points[points.length - 1].p;
+    const delta = last - first;
+    const deltaPct = first > 0 ? (delta / first) * 100 : 0;
+    const deltaCls = delta >= 0 ? 'worse' : 'better'; // lower price = better for buying
+    const deltaSign = delta >= 0 ? '+' : '';
+    const deltaColor = delta > 0 ? 'var(--red-2)' : delta < 0 ? 'var(--green)' : 'var(--muted)';
+
+    return `
+      <div class="sparkline-wrap">
+        <div class="sparkline-head">
+          <span class="sparkline-label">📈 Lowest price — last ${points.length} scans</span>
+          <span class="sparkline-meta">
+            ${money(first)} → ${money(last)}
+            <strong style="color:${deltaColor}; margin-left:6px;">
+              ${deltaSign}${deltaPct.toFixed(1)}%
+            </strong>
+          </span>
+        </div>
+        <svg class="sparkline" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+          <path d="${area}" fill="var(--chart-fill)" />
+          <path d="${line}" fill="none" stroke="var(--chart-line)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+        </svg>
+      </div>
+    `;
+  }
+
+  // ────────────────────────────────────────────────────────
+  // SCREENER — shared state
+  // ────────────────────────────────────────────────────────
+  const screener = {
+    itemId: null,
+    itemName: '',
+    listings: [],
+    total: 0,
+    offset: 0,
+    loading: false,
+  };
+
+  async function fetchMarketPage(itemId, offset) {
+    const res = await fetch('/api/market', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ itemId, key: realKey, offset }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Market scan failed');
+    return data;
+  }
+
+  async function fetchBazaar(itemId) {
+    try {
+      const res = await fetch('/api/bazaar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'bazaar', itemId, key: realKey }),
+      });
+      const data = await res.json();
+      if (!res.ok) return null;
+      return data.bazaar || null;
+    } catch { return null; }
+  }
+
+  function renderScreener() {
+    const { itemId, itemName, listings, total } = screener;
+
+    if (!listings.length) {
+      els.screenerOut.innerHTML = '<div class="result-sub">No listings found for this item.</div>';
+      return;
+    }
+
+    const avgPrice = listings.reduce((a, l) => a + l.price, 0) / listings.length;
+    const cheapest = listings[0].price;
+
+    // History + sparkline
+    const history = pushHistory(itemId, cheapest);
+    const sparklineHtml = renderSparkline(history);
+
+    let html = `
+      <div class="result-head" style="padding-bottom:12px;">
+        <div class="result-top">
+          <span class="result-item">${esc(itemName)} <span class="result-sub">(ID ${esc(String(itemId))})</span></span>
+          <span class="result-tag">${intFmt.format(total)} LISTINGS</span>
+        </div>
+        <div class="result-sub">Cheapest: <strong style="color:var(--text);">${money(cheapest)}</strong> · Average: <strong style="color:var(--text);">${money(avgPrice)}</strong> · Click <strong>→ Use</strong> to load into the calculator</div>
+      </div>
+      ${sparklineHtml}
+    `;
+
+    html += `<table class="screener-table">
+      <thead><tr>
+        <th>#</th><th>Price / unit</th><th>Qty</th><th>Total</th><th></th>
+      </tr></thead><tbody>`;
+
+    listings.forEach((l, i) => {
+      const lineTotal = l.price * l.amount;
+      html += `<tr data-price="${l.price}" data-amount="${l.amount}" data-item="${esc(itemName)}">
+        <td>${i + 1}</td>
+        <td class="price">${money(l.price)}</td>
+        <td>${intFmt.format(l.amount)}</td>
+        <td>${money(lineTotal)}</td>
+        <td class="use-cell">
+          <button type="button" class="use-btn" title="Load this listing into the calculator">
+            <span class="arrow">→</span> Use
+          </button>
+        </td>
+      </tr>`;
+    });
+
+    html += '</tbody></table>';
+
+    if (total > listings.length) {
+      html += `<div class="load-more-wrap">
+        <button type="button" id="loadMoreBtn" class="load-more-btn">
+          Load More (${listings.length} of ${intFmt.format(total)})
+        </button>
+      </div>`;
+    } else {
+      html += `<div class="result-sub" style="margin-top:10px; text-align:center;">
+        Showing all ${listings.length} listings.
+      </div>`;
+    }
+
+    els.screenerOut.innerHTML = html;
+
+    // Wire Use buttons
+    els.screenerOut.querySelectorAll('.use-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const row = btn.closest('tr');
+        applyListingToCalculator({
+          price:  parseFloat(row.dataset.price)  || 0,
+          amount: parseInt(row.dataset.amount, 10) || 0,
+          itemName: row.dataset.item || '',
+          rowEl: row,
+        });
+      });
+    });
+
+    // Wire Load More
+    const lm = document.getElementById('loadMoreBtn');
+    if (lm) lm.addEventListener('click', loadMore);
+  }
+
+  async function loadMore() {
+    if (screener.loading) return;
+    screener.loading = true;
+
+    const btn = document.getElementById('loadMoreBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Loading…'; }
+
+    try {
+      const nextOffset = screener.listings.length;
+      const data = await fetchMarketPage(screener.itemId, nextOffset);
+      const market = data.itemmarket || {};
+      const newListings = market.listings || [];
+
+      // Filter out duplicates (defensive — Torn can repeat if listings changed)
+      const seen = new Set(screener.listings.map(l => `${l.price}|${l.amount}`));
+      newListings.forEach(l => {
+        const key = `${l.price}|${l.amount}`;
+        if (!seen.has(key)) {
+          screener.listings.push(l);
+          seen.add(key);
+        }
+      });
+      screener.total = data._metadata?.total ?? screener.total;
+
+      renderScreener();
+    } catch (err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Load More (retry)';
+      }
+      const errBox = document.createElement('div');
+      errBox.className = 'unreachable';
+      errBox.style.marginTop = '10px';
+      errBox.textContent = `Load More failed: ${err.message}`;
+      els.screenerOut.appendChild(errBox);
+    } finally {
+      screener.loading = false;
+    }
+  }
+
+  // ────────────────────────────────────────────────────────
+  // SCAN BUTTON
   // ────────────────────────────────────────────────────────
   els.scanBtn.addEventListener('click', async () => {
     const rawInput = els.itemId.value.trim();
@@ -1197,7 +1587,7 @@
         if (result.multiple) {
           let html = `<div class="result-sub" style="margin-bottom:8px;">Multiple matches for "${esc(rawInput)}" — pick one:</div><div class="suggestions">`;
           result.multiple.forEach(it => {
-            html += `<button type="button" class="suggestion" data-id="${esc(String(it.id))}" data-name="${esc(it.name)}">${esc(it.name)} <small>#${esc(String(it.id))}</small></button>`;
+            html += `<button type="button" class="suggestion" data-id="${esc(String(it.id))}">${esc(it.name)} <small>#${esc(String(it.id))}</small></button>`;
           });
           html += '</div>';
           els.screenerOut.innerHTML = html;
@@ -1226,93 +1616,63 @@
       }
     }
 
-    els.screenerOut.innerHTML = '<div class="result-sub">Scanning market…</div>';
+    els.screenerOut.innerHTML = '<div class="result-sub">Scanning market + bazaar…</div>';
 
     try {
-      const res = await fetch('/api/market', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itemId, key: realKey }),
-      });
-      const data = await res.json();
+      // Fetch market + bazaar in parallel
+      const [marketData, bazaarData] = await Promise.all([
+        fetchMarketPage(itemId, 0),
+        fetchBazaar(itemId),
+      ]);
 
-      if (!res.ok) {
-        els.screenerOut.innerHTML = `<div class="unreachable">Error: ${esc(data.error || 'Unknown error')}</div>`;
-        return;
-      }
-
-      const market    = data.itemmarket || {};
-      const itemMeta  = market.item || {};
-      const listings  = market.listings || [];
-      const total     = data._metadata?.total ?? listings.length;
+      const market   = marketData.itemmarket || {};
+      const itemMeta = market.item || {};
+      const listings = market.listings || [];
+      const total    = marketData._metadata?.total ?? listings.length;
 
       if (!listings.length) {
         els.screenerOut.innerHTML = '<div class="result-sub">No listings found for this item.</div>';
         return;
       }
 
-      const avgPrice = itemMeta.average_price || 0;
-      const itemName = itemMeta.name || 'Item';
+      screener.itemId   = itemId;
+      screener.itemName = itemMeta.name || 'Item';
+      screener.listings = listings.slice();
+      screener.total    = total;
 
-      let html = `
-        <div class="result-head" style="padding-bottom:12px;">
-          <div class="result-top">
-            <span class="result-item">${esc(itemName)} <span class="result-sub">(ID ${esc(String(itemMeta.id || itemId))})</span></span>
-            <span class="result-tag">${intFmt.format(total)} LISTINGS</span>
-          </div>
-          <div class="result-sub">Average price: <strong style="color:var(--text);">${money(avgPrice)}</strong> · Cheapest first · Click <strong>→ Use</strong> to load a listing into the calculator</div>
-        </div>
-      `;
+      renderScreener();
 
-      html += `<table class="screener-table">
-        <thead><tr>
-          <th>#</th><th>Price / unit</th><th>Qty</th><th>Total</th><th></th>
-        </tr></thead><tbody>`;
+      // Bazaar panel
+      if (bazaarData) {
+        const bazaarListings = bazaarData.bazaar || [];
+        if (bazaarListings.length) {
+          const cheapestBazaar = bazaarListings.reduce(
+            (min, b) => (b.price < min.price ? b : min),
+            bazaarListings[0]
+          );
+          const cheapestMarket = listings[0].price;
+          const diff = cheapestMarket - cheapestBazaar.price;
+          const diffPct = (diff / cheapestMarket) * 100;
+          const better = diff > 0;
 
-      listings.forEach((l, i) => {
-        const unit  = l.price  || 0;
-        const qty   = l.amount || 0;
-        const lineTotal = unit * qty;
-        html += `<tr data-price="${unit}" data-amount="${qty}" data-item="${esc(itemName)}">
-          <td>${i + 1}</td>
-          <td class="price">${money(unit)}</td>
-          <td>${intFmt.format(qty)}</td>
-          <td>${money(lineTotal)}</td>
-          <td class="use-cell">
-            <button type="button" class="use-btn" title="Load this listing into the calculator">
-              <span class="arrow">→</span> Use
-            </button>
-          </td>
-        </tr>`;
-      });
-
-      html += '</tbody></table>';
-
-      if (total > listings.length) {
-        html += `<div class="result-sub" style="margin-top:10px;">
-          Showing ${listings.length} of ${intFmt.format(total)} listings.
-        </div>`;
+          const panel = document.createElement('div');
+          panel.className = 'bazaar-panel';
+          panel.innerHTML = `
+            <div>
+              <div class="bp-label">🏪 Cheapest Bazaar (no 5% tax)</div>
+              <div class="bp-price">${money(cheapestBazaar.price)}</div>
+              <div class="bp-meta">${intFmt.format(cheapestBazaar.quantity)} available · seller #${esc(String(cheapestBazaar.seller_id || '?'))}</div>
+            </div>
+            <div class="bp-compare ${better ? 'better' : 'worse'}">
+              ${better ? '▼' : '▲'} ${Math.abs(diffPct).toFixed(1)}%
+              ${better ? 'cheaper than market' : 'more than market'}
+            </div>
+          `;
+          els.screenerOut.insertBefore(panel, els.screenerOut.querySelector('.sparkline-wrap'));
+        }
       }
-
-      els.screenerOut.innerHTML = html;
-
-      els.screenerOut.querySelectorAll('.use-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const row = btn.closest('tr');
-          const price  = parseFloat(row.dataset.price) || 0;
-          const amount = parseInt(row.dataset.amount, 10) || 0;
-          const itemName = row.dataset.item || '';
-
-          applyListingToCalculator({
-            price,
-            amount,
-            itemName,
-            rowEl: row,
-          });
-        });
-      });
     } catch (err) {
-      els.screenerOut.innerHTML = '<div class="unreachable">Network error — is the proxy function deployed?</div>';
+      els.screenerOut.innerHTML = `<div class="unreachable">${esc(err.message)}</div>`;
     } finally {
       els.scanBtn.disabled = false;
     }
